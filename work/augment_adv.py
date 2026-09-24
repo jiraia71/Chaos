@@ -102,61 +102,89 @@ def compute_damp2(name, f, z1, z2, cfg):
     return pts, E0
 
 
+def job(spec):
+    """Run one unit of work in a worker process. spec = (kind, nm, idx, cfg[, args])."""
+    kind, nm, idx, cfg = spec[0], spec[1], spec[2], spec[3]
+    if kind == "abs":
+        f = spec[4]
+        xs, vs, mp, reg = compute_abs(nm, f, cfg)
+        return kind, nm, idx, (xs, vs, mp, reg)
+    if kind == "sec2":
+        f = spec[4]
+        pts, fli, E0 = compute_sec2(nm, f, cfg)
+        return kind, nm, idx, (pts, fli, E0)
+    if kind == "damp2":
+        z1, z2 = spec[4]
+        pts, E0 = compute_damp2(nm, .05, z1, z2, cfg)
+        return kind, nm, idx, (pts[:150], pts[-300:], E0)
+    raise ValueError(kind)
+
+
 def main():
+    from concurrent.futures import ProcessPoolExecutor, as_completed
+    import time
     ap = argparse.ArgumentParser()
     ap.add_argument("--full", action="store_true", help="production resolution (heavy)")
     ap.add_argument("--out", default=os.environ.get("KAM_OUT", ""))
+    ap.add_argument("--workers", type=int, default=int(os.environ.get("KAM_WORKERS", "4")))
     args = ap.parse_args()
     cfg = PRESET["full" if args.full else "preview"]
     mode = "full" if args.full else "preview"
     out = Path(args.out) if args.out else SRC.with_name(
         "dados_kam.mat" if args.full else "dados_kam_preview.mat")
 
-    print(f"[{mode}] lendo {SRC}")
+    print(f"[{mode}] lendo {SRC} (workers={args.workers})", flush=True)
     raw = loadmat(SRC, squeeze_me=False, struct_as_record=False)
     Dsrc = unwrap(raw["D"])
     cases = list(Dsrc._fieldnames)
 
+    # copia verbatim todos os campos 1.5 GL existentes (formas preservadas)
     D = {}
     for nm in cases:
         Csrc = unwrap(getattr(Dsrc, nm))
-        # copia verbatim todos os campos existentes (formas preservadas)
-        c = {f: getattr(Csrc, f) for f in Csrc._fieldnames}
+        D[nm] = {f: getattr(Csrc, f) for f in Csrc._fieldnames}
 
-        # --- abs_* (K7): mapas FLI 2.5 GL para TODOS os casos ---
-        abs_maps = []; abs_reg = []; axs = avs = None
-        for f in K.F_ABS_ALL:
-            axs, avs, mp, reg = compute_abs(nm, f, cfg)
-            abs_maps.append(mp); abs_reg.append(reg)
+    # monta a lista de tarefas 2.5 GL e distribui num pool
+    specs = []
+    for nm in cases:
+        for i, f in enumerate(K.F_ABS_ALL):
+            specs.append(("abs", nm, i, cfg, f))
+        for i, f in enumerate(K.F_SECTIONS):
+            specs.append(("sec2", nm, i, cfg, f))
+        for i, zz in enumerate(K.DAMP2_ZETA):
+            specs.append(("damp2", nm, i, cfg, zz))
+    # buffers indexados por caso
+    buf = {nm: dict(abs=[None] * len(K.F_ABS_ALL), sec2=[None] * len(K.F_SECTIONS),
+                    damp2=[None] * len(K.DAMP2_ZETA)) for nm in cases}
+    t0 = time.time()
+    with ProcessPoolExecutor(max_workers=args.workers) as pool:
+        futs = [pool.submit(job, s) for s in specs]
+        for k, fu in enumerate(as_completed(futs), 1):
+            kind, nm, idx, payload = fu.result()
+            buf[nm][kind][idx] = payload
+            print(f"  done {k}/{len(specs)}  {kind} {nm}[{idx}]  [{time.time()-t0:.0f}s]", flush=True)
+
+    for nm in cases:
+        c = D[nm]
+        # abs_* (K7)
+        xs = buf[nm]["abs"][0][0]; vs = buf[nm]["abs"][0][1]
         c["abs_f"] = np.array(K.F_ABS_ALL, float).reshape(1, -1)
-        c["abs_maps"] = np.stack(abs_maps).astype(np.float32)
-        c["abs_xs"] = axs.reshape(1, -1); c["abs_vs"] = avs.reshape(-1, 1)
-        c["abs_regular"] = np.array(abs_reg, float).reshape(1, -1)
-
-        # --- sec2_* (K8): seções de Poincaré 2.5 GL ---
-        s_pts = []; s_fli = []; s_E0 = None
-        for f in K.F_SECTIONS:
-            pts, fli, s_E0 = compute_sec2(nm, f, cfg)
-            s_pts.append(pts); s_fli.append(fli)
+        c["abs_maps"] = np.stack([p[2] for p in buf[nm]["abs"]]).astype(np.float32)
+        c["abs_xs"] = xs.reshape(1, -1); c["abs_vs"] = vs.reshape(-1, 1)
+        c["abs_regular"] = np.array([p[3] for p in buf[nm]["abs"]], float).reshape(1, -1)
+        # sec2_* (K8)
         c["sec2_f"] = np.array(K.F_SECTIONS, float).reshape(1, -1)
-        c["sec2_pts"] = np.stack(s_pts).astype(np.float32)
-        c["sec2_fli"] = np.stack(s_fli)
-        c["sec2_E0"] = s_E0.reshape(-1, 1)
-
-        # --- damp2_* (K9): amortecimento 2.5 GL ---
-        d_early = []; d_late = []; d_E0 = None
-        for z1, z2 in K.DAMP2_ZETA:
-            pts, d_E0 = compute_damp2(nm, .05, z1, z2, cfg)
-            d_early.append(pts[:150]); d_late.append(pts[-300:])
+        c["sec2_pts"] = np.stack([p[0] for p in buf[nm]["sec2"]]).astype(np.float32)
+        c["sec2_fli"] = np.stack([p[1] for p in buf[nm]["sec2"]])
+        c["sec2_E0"] = buf[nm]["sec2"][0][2].reshape(-1, 1)
+        # damp2_* (K9)
         c["damp2_zeta1"] = np.array([z for z, _ in K.DAMP2_ZETA], float).reshape(1, -1)
         c["damp2_zeta2"] = np.array([z for _, z in K.DAMP2_ZETA], float).reshape(1, -1)
         c["damp2_f"] = .05
-        c["damp2_E0"] = d_E0.reshape(-1, 1)
-        c["damp2_early"] = np.stack(d_early).astype(np.float32)
-        c["damp2_late"] = np.stack(d_late).astype(np.float32)
-
-        D[nm] = c
-        print(f"  {nm}: abs_regular={np.round(c['abs_regular'].ravel(),3)}")
+        c["damp2_E0"] = buf[nm]["damp2"][0][2].reshape(-1, 1)
+        c["damp2_early"] = np.stack([p[0] for p in buf[nm]["damp2"]]).astype(np.float32)
+        c["damp2_late"] = np.stack([p[1] for p in buf[nm]["damp2"]]).astype(np.float32)
+        print(f"  {nm}: abs_regular={np.round(c['abs_regular'].ravel(),3)}", flush=True)
 
     savemat(out, dict(D=D, ECUT=K.ECUT, MU=K.MU, BETA2=K.BETA2,
                       fli_chaos_threshold=8., section_chaos_threshold=10.),
