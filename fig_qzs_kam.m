@@ -18,12 +18,15 @@ function fig_qzs_kam(dpi,conjunto)
 % K4 fracao regular do espaco de fase em funcao de f
 % K5 efeito do acoplamento com o absorvedor (1.5 GL x 2.5 GL)
 % K6 destino dos toros com amortecimento (KAM nao se aplica a ele)
+% K7 mapas FLI do sistema completo 2.5 GL (QZS-ADV), 3 casos
+% K8 secoes de Poincare do sistema completo 2.5 GL (QZS-ADV)
+% K9 destino dos toros com amortecimento no sistema 2.5 GL (zeta1, zeta2)
 % PNG: fundo transparente. PDF: vetorial (mapas e nuvens embutidos como imagem).
 
 if nargin<1, dpi=1200; end
 if nargin<2, conjunto='todas'; end
 validateattributes(dpi,{'numeric'},{'scalar','integer','positive'});
-conjunto=validatestring(conjunto,{'todas','K1','K2','K3','K4','K5','K6'});
+conjunto=validatestring(conjunto,{'todas','K1','K2','K3','K4','K5','K6','K7','K8','K9'});
 root=fileparts(mfilename('fullpath'));
 S=load(fullfile(root,'dados_kam.mat'));D=S.D;
 names={'monostable','shallow_wells','deep_wells'};
@@ -39,6 +42,9 @@ if want('K3'), fig_K3(D,names,labels,etatex,out,dpi); end
 if want('K4'), fig_K4(D,names,labels,etatex,out,dpi); end
 if want('K5'), fig_K5(D,out,dpi); end
 if want('K6'), fig_K6(D,names,labels,etatex,out,dpi); end
+if want('K7'), fig_K7(D,names,labels,etatex,out,dpi); end
+if want('K8'), fig_K8(D,names,labels,etatex,out,dpi); end
+if want('K9'), fig_K9(D,names,labels,etatex,out,dpi); end
 fprintf('Figuras salvas em: %s\n',out);
 end
 
@@ -253,8 +259,109 @@ put_text(L,W/2,113,'Dissipation destroys the KAM tori: invariant curves collapse
 export_figure(fig,fullfile(out,'K6_amortecimento'),dpi);close(fig);
 end
 
+% ------------------------------------------------------------------ K7
+function fig_K7(D,names,labels,etatex,out,dpi)
+% Mapas FLI do sistema completo 2.5 GL (com absorvedor), 3 casos x 3 forcamentos.
+W=180;H=168;[fig,L]=new_figure(W,H);sz=40;x0=24;gx=6;gy=11;y0=18;cmap=fli_colormap(512);
+for r=1:3
+    C=D.(names{r});nf=numel(C.abs_f);
+    for c=1:nf
+        ax=mm_axes(fig,W,H,x0+(c-1)*(sz+gx),y0+(3-r)*(sz+gy),sz,sz);
+        reg=fli_panel(ax,C,squeeze(C.abs_maps(c,:,:)),C.abs_xs,C.abs_vs,cmap);
+        text(ax,.03,.97,sprintf('regular %.0f%%',100*reg),'Units','normalized','VerticalAlignment','top', ...
+            'FontName','Times New Roman','FontSize',7,'Color','w');
+        if r==1, put_text(L,x0+(c-1)*(sz+gx)+sz/2,y0+3*sz+2*gy+3.5,sprintf('\\itf\\rm = %g',C.abs_f(c)),11); end
+        if r==3, xlabel(ax,'\itX\rm_0'); else, set(ax,'XTickLabel',[]); end
+        if c==1, ylabel(ax,'d\itX\rm_0/d\itt'); else, set(ax,'YTickLabel',[]); end
+    end
+    put_rot(L,5,y0+(3-r)*(sz+gy)+sz/2,sprintf('%s, %s',labels{r},etatex{r}),10);
+end
+cb=mm_axes(fig,W,H,x0,8,52,2);manual_colorbar(cb,cmap,[0 5 10 15 20]/20,'%g',[0 5 10 15 20]);
+put_left(L,x0+54,9,'FLI after 400 periods (dark: KAM tori, bright: chaos)',8);
+put_left(L,x0,3.5,['full 2.5-DOF system, \it\mu\rm = 0.1, \it\beta\rm = 0.35, absorber at \itZ\rm = \itW\rm = 0 at \itt\rm = 0;' ...
+    '  white dotted: \itH\rm_0 - \itU\rm_{min} = 0.5'],8);
+put_text(L,W/2,163,'Fast Lyapunov indicator over initial conditions, QZS-ADV (2.5 DOF), conservative limit',12);
+export_figure(fig,fullfile(out,'K7_FLI_2p5GL'),dpi);close(fig);
+end
+
+% ------------------------------------------------------------------ K8
+function fig_K8(D,names,labels,etatex,out,dpi)
+% Secoes de Poincare estroboscopicas do sistema completo 2.5 GL, projetadas em (X, dX/dt).
+W=180;H=168;[fig,L]=new_figure(W,H);sz=35;x0=20;gx=4.5;gy=11;y0=18;cmap=energy_colormap(512);
+for r=1:3
+    C=D.(names{r});xw=C.xw;vw=C.vw;
+    [XG,VG]=meshgrid(linspace(-xw,xw,400),linspace(-vw,vw,400));
+    HG=.5*VG.^2+potential(XG,C.eta)-C.Umin;
+    for c=1:numel(C.sec2_f)
+        ax=mm_axes(fig,W,H,x0+(c-1)*(sz+gx),y0+(3-r)*(sz+gy),sz,sz);hold(ax,'on');
+        pts=squeeze(C.sec2_pts(c,:,:,:));
+        chaotic=C.sec2_fli(c,:)>S_chaos();
+        xg=squeeze(pts(:,1,chaotic));yg=squeeze(pts(:,2,chaotic));
+        if ~isempty(xg), scatter(ax,double(xg(:)),double(yg(:)),.2,[.55 .55 .55],'filled','MarkerEdgeColor','none'); end
+        keep=find(~chaotic);
+        if ~isempty(keep)
+            xr=squeeze(pts(:,1,keep));yr=squeeze(pts(:,2,keep));
+            cc=repmat(min(max(C.sec2_E0(keep).'/.8,0),1),size(xr,1),1);
+            scatter(ax,double(xr(:)),double(yr(:)),.25,double(cc(:)),'filled','MarkerEdgeColor','none');
+            colormap(ax,cmap);caxis(ax,[0 1]);
+        end
+        if C.depth>0, contour(ax,XG,VG,HG,C.depth*[1 1],'LineColor',[.13 .13 .13],'LineWidth',.45,'LineStyle','--'); end
+        xlim(ax,[-xw xw]);ylim(ax,[-vw vw]);style_axes(ax,8);pbaspect(ax,[1 1 1]);
+        text(ax,.03,.97,sprintf('chaotic %.0f%%',100*mean(chaotic)),'Units','normalized','VerticalAlignment','top', ...
+            'FontName','Times New Roman','FontSize',7,'BackgroundColor','w','Margin',.5);
+        if r==1, put_text(L,x0+(c-1)*(sz+gx)+sz/2,y0+3*sz+2*gy+3.5,sprintf('\\itf\\rm = %g',C.sec2_f(c)),11); end
+        if r==3, xlabel(ax,'\itX'); else, set(ax,'XTickLabel',[]); end
+        if c==1, ylabel(ax,'d\itX\rm/d\itt'); else, set(ax,'YTickLabel',[]); end
+    end
+    put_rot(L,5,y0+(3-r)*(sz+gy)+sz/2,sprintf('%s, %s',labels{r},etatex{r}),10);
+end
+cb=mm_axes(fig,W,H,x0,8,52,2);manual_colorbar(cb,cmap,[0 .4 .8],'%.1f');
+put_left(L,x0+54,9,'initial energy \itE\rm_0 - \itU\rm_{min} (regular orbits)',8);
+put_left(L,x0,3.5,'gray: chaotic orbits (FLI > 10);  black dashed: separatrix;  full 2.5-DOF system, absorber at \itZ\rm = \itW\rm = 0 at \itt\rm = 0',8);
+put_text(L,W/2,163,['Stroboscopic Poincar' char(233) ' sections of the QZS-ADV system (2.5 DOF), conservative limit \it\zeta\rm_1 = \it\zeta\rm_2 = 0'],12);
+export_figure(fig,fullfile(out,'K8_secoes_2p5GL'),dpi);close(fig);
+end
+
+% ------------------------------------------------------------------ K9
+function fig_K9(D,names,labels,etatex,out,dpi)
+% Destino dos toros com amortecimento no sistema completo 2.5 GL (zeta1 no primario, zeta2 no absorvedor).
+W=180;H=168;[fig,L]=new_figure(W,H);sz=35;x0=20;gx=4.5;gy=11;y0=18;cmap=energy_colormap(512);
+for r=1:3
+    C=D.(names{r});xw=C.xw;vw=C.vw;
+    [XG,VG]=meshgrid(linspace(-xw,xw,400),linspace(-vw,vw,400));
+    HG=.5*VG.^2+potential(XG,C.eta)-C.Umin;
+    for c=1:numel(C.damp2_zeta1)
+        ax=mm_axes(fig,W,H,x0+(c-1)*(sz+gx),y0+(3-r)*(sz+gy),sz,sz);hold(ax,'on');
+        e=squeeze(C.damp2_early(c,:,:,:));l=squeeze(C.damp2_late(c,:,:,:));
+        xe=squeeze(e(:,1,:));ye=squeeze(e(:,2,:));
+        scatter(ax,double(xe(:)),double(ye(:)),.2,[.81 .81 .81],'filled','MarkerEdgeColor','none');
+        xl=squeeze(l(:,1,:));yl=squeeze(l(:,2,:));
+        cc=repmat(min(max(C.damp2_E0.'/.8,0),1),size(xl,1),1);
+        s=.25;if C.damp2_zeta1(c)>0||C.damp2_zeta2(c)>0, s=2; end
+        scatter(ax,double(xl(:)),double(yl(:)),s,double(cc(:)),'filled','MarkerEdgeColor','none');
+        colormap(ax,cmap);caxis(ax,[0 1]);
+        if C.depth>0, contour(ax,XG,VG,HG,C.depth*[1 1],'LineColor',[.13 .13 .13],'LineWidth',.45,'LineStyle','--'); end
+        xlim(ax,[-xw xw]);ylim(ax,[-vw vw]);style_axes(ax,8);pbaspect(ax,[1 1 1]);
+        if r==1, put_text(L,x0+(c-1)*(sz+gx)+sz/2,y0+3*sz+2*gy+3.5,zeta_label(C.damp2_zeta1(c),C.damp2_zeta2(c)),8); end
+        if r==3, xlabel(ax,'\itX'); else, set(ax,'XTickLabel',[]); end
+        if c==1, ylabel(ax,'d\itX\rm/d\itt'); else, set(ax,'YTickLabel',[]); end
+    end
+    put_rot(L,5,y0+(3-r)*(sz+gy)+sz/2,sprintf('%s, %s',labels{r},etatex{r}),10);
+end
+put_left(L,x0,8,'gray: first 150 periods;  color: periods 2701-3000, by initial energy;  dashed: separatrix',8);
+put_left(L,x0,3.5,'\itf\rm = 0.05, full 2.5-DOF system; \it\zeta\rm_1 on the primary mass, \it\zeta\rm_2 on the absorber; \it\zeta\rm_1 = \it\zeta\rm_2 = 0 is the conservative limit',8);
+put_text(L,W/2,163,'Damping destroys the KAM tori in the QZS-ADV system: invariant curves collapse onto attractors',12);
+export_figure(fig,fullfile(out,'K9_amortecimento_2p5GL'),dpi);close(fig);
+end
+
 % ------------------------------------------------------------------ helpers
 function v=S_chaos(), v=10; end
+function t=zeta_label(z1,z2)
+t=sprintf('\\it\\zeta\\rm_1 = %s, \\it\\zeta\\rm_2 = %s',zeta_str(z1),zeta_str(z2));
+end
+function s=zeta_str(z)
+if z==0, s='0'; else, s=sprintf('10^{%d}',round(log10(z))); end
+end
 function u=potential(x,eta), u=1.55*x.^2-3*sqrt((1.5*eta)^2+x.^2); end
 
 function reg=fli_panel(ax,C,M,xs,vs,cmap)

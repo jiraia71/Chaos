@@ -29,11 +29,21 @@ for nm,label in CASES:
   fr.append(np.mean(v<=8));lo.append(np.mean(v<=6));hi.append(np.mean(v<=10))
  c.update(frac_f=np.array(K.F_FRACTION).reshape(1,-1),frac_regular=np.array(fr).reshape(1,-1),
   frac_fli6=np.array(lo).reshape(1,-1),frac_fli10=np.array(hi).reshape(1,-1))
- if nm=='shallow_wells':
-  ab=[np.load(K.CACHE/f'absorber_shallow_wells_{f}.npz') for f in [.01,.05,.15]]
-  c.update(abs_f=np.array([.01,.05,.15]).reshape(1,-1),abs_maps=np.stack([g['fli'] for g in ab]).astype(np.float32),
-   abs_xs=ab[0]['xs'].reshape(1,-1),abs_vs=ab[0]['vs'].reshape(-1,1),
-   abs_regular=np.array([float(np.mean(g['fli'][g['H0']<=K.ECUT]<=8)) for g in ab]).reshape(1,-1))
+ # 2.5-DOF (QZS-ADV) FLI maps, now for every case
+ ab=[np.load(K.CACHE/f'absorber_{nm}_{f}.npz') for f in K.F_ABS_ALL]
+ c.update(abs_f=np.array(K.F_ABS_ALL).reshape(1,-1),abs_maps=np.stack([g['fli'] for g in ab]).astype(np.float32),
+  abs_xs=ab[0]['xs'].reshape(1,-1),abs_vs=ab[0]['vs'].reshape(-1,1),
+  abs_regular=np.array([float(np.mean(g['fli'][g['H0']<=K.ECUT]<=8)) for g in ab]).reshape(1,-1))
+ # 2.5-DOF stroboscopic Poincare sections
+ sec2=[np.load(K.CACHE/f'section2_{nm}_{f}.npz') for f in K.F_SECTIONS]
+ c.update(sec2_f=np.array(K.F_SECTIONS).reshape(1,-1),sec2_pts=np.stack([s['pts'] for s in sec2]).astype(np.float32),
+  sec2_fli=np.stack([s['fli'] for s in sec2]),sec2_E0=sec2[0]['E0'].reshape(-1,1))
+ # 2.5-DOF damping: fate of the tori with (zeta1, zeta2)
+ dm2=[np.load(K.CACHE/f'damping2_{nm}_0.05_{z1}_{z2}.npz') for z1,z2 in K.DAMP2_ZETA]
+ c.update(damp2_zeta1=np.array([z1 for z1,_ in K.DAMP2_ZETA]).reshape(1,-1),
+  damp2_zeta2=np.array([z2 for _,z2 in K.DAMP2_ZETA]).reshape(1,-1),damp2_f=.05,
+  damp2_E0=dm2[0]['E0'].reshape(-1,1),damp2_early=np.stack([g['pts'][:150] for g in dm2]).astype(np.float32),
+  damp2_late=np.stack([g['pts'][-300:] for g in dm2]).astype(np.float32))
  if nm in ('shallow_wells','deep_wells'):
   zs=[0.,1e-4,1e-3,1e-2];dm=[np.load(K.CACHE/f'damping_{nm}_0.05_{z}.npz') for z in zs]
   c.update(damp_zeta1=np.array(zs).reshape(1,-1),damp_f=.05,damp_E0=dm[0]['E0'].reshape(-1,1),

@@ -28,6 +28,8 @@ CASES={'monostable':dict(eta=2/3.1,xw=1.4,vw=1.4,x0max=1.25),
        'shallow_wells':dict(eta=.6,xw=1.4,vw=1.4,x0max=1.30),
        'deep_wells':dict(eta=.3,xw=1.9,vw=1.5,x0max=1.75)}
 F_SECTIONS=[.002,.01,.05,.15];F_FRACTION=[.001,.002,.005,.01,.02,.05,.1,.15,.2,.3]
+F_ABS_ALL=[.01,.05,.15]                       # forcings for the 2.5-DOF FLI maps (every case)
+DAMP2_ZETA=[(0.,0.),(1e-3,0.),(1e-2,0.),(1e-2,1e-2)]  # (zeta1, zeta2) for the damped 2.5-DOF
 ECUT=.5;W1=1/(2-2**(1/3));W0=-2**(1/3)/(2-2**(1/3))
 CY=[W1/2,(W0+W1)/2,(W0+W1)/2,W1/2];DY=[W1,W0,W1]
 
@@ -105,10 +107,13 @@ def yoshida_1dof(x,v,eta,f,periods,ns,tangent=True,record=True,tag=''):
   if tag and c%200==199:print(f'  {tag}: {c+1}/{periods} {time.time()-t0:.0f}s',flush=True)
  return x,v,logg,pts
 
-def yoshida_2dof(x,v,x2,v2,eta,f,periods,ns,tag=''):
- """Conservative 2.5-DOF system (p2 = mu v2), FLI of the 4D tangent map."""
+def yoshida_2dof(x,v,x2,v2,eta,f,periods,ns,record=False,tag=''):
+ """Conservative 2.5-DOF system (p2 = mu v2), FLI of the 4D tangent map.
+ With record=True also returns the stroboscopic samples (X, dX/dt) of the
+ primary coordinate, one per period, as a (periods, 2, n) float32 array."""
  n=x.size;h=T/ns;t=0.;mb=MU*BETA2
  d=[np.ones(n)/2 for _ in range(4)];logg=np.zeros(n);t0=time.time()
+ pts=np.empty((periods,2,n),np.float32) if record else None
  for c in range(periods):
   for s in range(ns):
    for k in range(4):
@@ -121,8 +126,9 @@ def yoshida_2dof(x,v,x2,v2,eta,f,periods,ns,tag=''):
     d[1]=d[1]+DY[k]*h*(-(k2+mb)*d[0]+mb*d[2]);d[3]=d[3]+DY[k]*h*(BETA2*(d[0]-d[2]))
   t=(c+1)*T
   nrm=np.sqrt(d[0]**2+d[1]**2+d[2]**2+d[3]**2);logg+=np.log10(nrm);d=[q/nrm for q in d]
+  if record:pts[c,0]=x;pts[c,1]=v
   if tag and c%100==99:print(f'  {tag}: {c+1}/{periods} {time.time()-t0:.0f}s',flush=True)
- return logg
+ return logg,pts
 
 # ------------------------------------------------------------------ tasks
 def ics_line(name):
@@ -147,10 +153,45 @@ def task_fli(name,f,nx,periods,ns,prefix):
 
 def task_absorber(name,f,nx,periods,ns):
  eta=CASES[name]['eta'];xs,vs,X,V=grid(name,nx)
- fli=yoshida_2dof(X.copy(),V.copy(),X.copy(),V.copy(),eta,f,periods,ns,tag=f'abs {name} f={f}')
+ fli,_=yoshida_2dof(X.copy(),V.copy(),X.copy(),V.copy(),eta,f,periods,ns,tag=f'abs {name} f={f}')
  H0=.5*V**2+U(X,eta)-U(xmin(eta),eta)
  np.savez_compressed(CACHE/f'absorber_{name}_{f}.npz',xs=xs,vs=vs,fli=fli.reshape(nx,nx),H0=H0.reshape(nx,nx),f=f,periods=periods)
  return name,f'absorber f={f}',float(np.mean(fli[H0<=ECUT]<=8))
+
+def task_section_2dof(name,f):
+ """Stroboscopic Poincare sections of the full 2.5-DOF system (with absorber),
+ projected on the primary (X, dX/dt). Absorber at rest relative to the primary
+ at t = 0 (Z = W = 0), matching task_absorber; FLI of the 4D tangent map."""
+ eta=CASES[name]['eta'];x0,v0=ics_line(name)
+ fli,pts=yoshida_2dof(x0.copy(),v0.copy(),x0.copy(),v0.copy(),eta,f,1500,200,record=True,tag=f'sec2 {name} f={f}')
+ E0=.5*v0**2+U(x0,eta)-U(xmin(eta),eta)
+ np.savez_compressed(CACHE/f'section2_{name}_{f}.npz',x0=x0,v0=v0,E0=E0,fli=fli,pts=pts,f=f,eta=eta)
+ return name,f'section2 f={f}',float(np.mean(fli>10))
+
+def task_damping_2dof(name,f,zeta1,zeta2):
+ """Fate of the tori in the 2.5-DOF system with viscous damping: zeta1 on the
+ primary velocity and zeta2 on the absorber velocity (both absolute; the
+ conservative limit zeta1 = zeta2 = 0 recovers yoshida_2dof). RK4, 180 steps
+ per period. Records the primary (X, dX/dt); absorber starts at Z = W = 0."""
+ eta=CASES[name]['eta'];x,v=ics_line(name);x2=x.copy();v2=v.copy()
+ ns=180;h=T/ns;mb=MU*BETA2;cs=np.cos(np.arange(2*ns+1)*np.pi/ns)
+ periods=3000;pts=np.empty((periods,2,x.size),np.float32);t0=time.time()
+ def deriv(x,v,x2,v2,force):
+  av=force-dU(x,eta)-mb*(x-x2)-2*zeta1*v
+  a2=BETA2*(x-x2)-2*zeta2*v2
+  return v,av,v2,a2
+ for c in range(periods):
+  for s in range(ns):
+   k1=deriv(x,v,x2,v2,f*cs[2*s])
+   k2=deriv(x+.5*h*k1[0],v+.5*h*k1[1],x2+.5*h*k1[2],v2+.5*h*k1[3],f*cs[2*s+1])
+   k3=deriv(x+.5*h*k2[0],v+.5*h*k2[1],x2+.5*h*k2[2],v2+.5*h*k2[3],f*cs[2*s+1])
+   k4=deriv(x+h*k3[0],v+h*k3[1],x2+h*k3[2],v2+h*k3[3],f*cs[2*s+2])
+   x=x+h/6*(k1[0]+2*k2[0]+2*k3[0]+k4[0]);v=v+h/6*(k1[1]+2*k2[1]+2*k3[1]+k4[1])
+   x2=x2+h/6*(k1[2]+2*k2[2]+2*k3[2]+k4[2]);v2=v2+h/6*(k1[3]+2*k2[3]+2*k3[3]+k4[3])
+  pts[c,0]=x;pts[c,1]=v
+ E0=U(ics_line(name)[0],eta)-U(xmin(eta),eta)
+ np.savez_compressed(CACHE/f'damping2_{name}_{f}_{zeta1}_{zeta2}.npz',pts=pts,E0=E0,f=f,zeta1=zeta1,zeta2=zeta2)
+ return name,f'damping2 f={f} z1={zeta1} z2={zeta2}',time.time()-t0
 
 def task_damping(name,f,zeta1):
  eta=CASES[name]['eta'];x,v=ics_line(name);ns=180;h=T/ns;cs=np.cos(np.arange(2*ns+1)*np.pi/ns)
@@ -213,6 +254,14 @@ def main():
   want(CACHE/f'absorber_shallow_wells_{f}.npz',task_absorber,'shallow_wells',f,160,400,100)
  for nm in ['shallow_wells','deep_wells']:
   for z in [0.,1e-4,1e-3,1e-2]:want(CACHE/f'damping_{nm}_0.05_{z}.npz',task_damping,nm,.05,z)
+ # ---- full 2.5-DOF (QZS-ADV) analysis over all three cases ----
+ for nm in CASES:
+  for f in F_ABS_ALL:                       # FLI maps with the absorber, every case
+   want(CACHE/f'absorber_{nm}_{f}.npz',task_absorber,nm,f,160,400,100)
+  for f in F_SECTIONS:                       # stroboscopic sections, 2.5-DOF
+   want(CACHE/f'section2_{nm}_{f}.npz',task_section_2dof,nm,f)
+  for z1,z2 in DAMP2_ZETA:                    # damped 2.5-DOF (destruction of the tori)
+   want(CACHE/f'damping2_{nm}_0.05_{z1}_{z2}.npz',task_damping_2dof,nm,.05,z1,z2)
  print(f'{len(jobs)} tasks to run, {workers} workers',flush=True)
  with ProcessPoolExecutor(max_workers=workers) as pool:
   fut={pool.submit(fn,*args):(fn.__name__,args) for fn,args in jobs}

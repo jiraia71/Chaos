@@ -25,6 +25,11 @@ htmlcov/
 .mypy_cache/
 .ruff_cache/
 
+# Saídas / cache do cálculo KAM
+outputs/
+dados_kam_preview.mat
+figuras_matlab_*dpi/
+
 # IDEs / editores
 .vscode/
 .idea/
