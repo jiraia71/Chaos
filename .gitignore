@@ -45,3 +45,6 @@ package-lock.json
 .idea/
 *.swp
 .DS_Store
+
+# Resultado gerado pela recalibração de FLI
+work/recalibrate_result.json
