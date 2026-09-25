@@ -29,6 +29,7 @@ htmlcov/
 outputs/
 dados_kam_preview.mat
 figuras_matlab_*dpi/
+*_preview.png
 
 # IDEs / editores
 .vscode/
