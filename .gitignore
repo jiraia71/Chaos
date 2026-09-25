@@ -31,6 +31,15 @@ dados_kam_preview.mat
 figuras_matlab_*dpi/
 *_preview.png
 
+# Node (docx-js para gerar o relatório)
+node_modules/
+package.json
+package-lock.json
+
+# Documentos/renders gerados
+*.docx
+*.pdf
+
 # IDEs / editores
 .vscode/
 .idea/

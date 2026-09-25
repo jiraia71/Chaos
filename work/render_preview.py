@@ -327,11 +327,36 @@ def fig_K6(D):
     p = f"{OUT}/K6_amortecimento_preview.png"; fig.savefig(p, dpi=130); plt.close(fig); return p
 
 
+def fig_CMP(D):
+    """Barras: fração regular 1.5 GL vs 2.5 GL, por caso e forçamento (para o relatório)."""
+    fig, axes = plt.subplots(1, 3, figsize=(11, 4), constrained_layout=True, sharey=True)
+    for j, nm in enumerate(NAMES):
+        C = D[nm]; eta = gs(C, "eta"); Um = gs(C, "Umin")
+        ff = g(C, "fli_f").ravel(); af = g(C, "abs_f").ravel()
+        fmaps = g(C, "fli_maps"); fxs = g(C, "fli_xs").ravel(); fvs = g(C, "fli_vs").ravel()
+        XG, VG = np.meshgrid(fxs, fvs); H0 = .5 * VG ** 2 + U(XG, eta) - Um
+        areg = g(C, "abs_regular").ravel()
+        r15 = [100 * float(np.mean(fmaps[int(np.argmin(np.abs(ff - f)))][H0 <= .5] <= 8)) for f in af]
+        r25 = [100 * v for v in areg]
+        x = np.arange(len(af)); w = .38; ax = axes[j]
+        b1 = ax.bar(x - w / 2, r15, w, label="1.5 GL (QZS)", color="#1f4e8c")
+        b2 = ax.bar(x + w / 2, r25, w, label="2.5 GL (QZS-ADV)", color="#bc4b51")
+        for b in list(b1) + list(b2):
+            ax.text(b.get_x() + b.get_width() / 2, b.get_height() + 1, f"{b.get_height():.0f}",
+                    ha="center", va="bottom", fontsize=8)
+        ax.set_xticks(x); ax.set_xticklabels([f"f={f:g}" for f in af]); ax.set_ylim(0, 108)
+        ax.set_title(LABELS[j].split("  ")[0]); ax.grid(axis="y", alpha=.3)
+        if j == 0:
+            ax.set_ylabel("fração regular (%) — toros KAM"); ax.legend(loc="lower left", fontsize=8)
+    fig.suptitle("Fração regular do espaço de fase: QZS (1.5 GL) vs QZS-ADV (2.5 GL)", fontsize=12)
+    p = f"{OUT}/CMP_fracao_regular_preview.png"; fig.savefig(p, dpi=150); plt.close(fig); return p
+
+
 if __name__ == "__main__":
     D = load()
     only = sys.argv[3].split(",") if len(sys.argv) > 3 else None
     allfigs = {"K1": fig_K1, "K2": fig_K2, "K3": fig_K3, "K4": fig_K4, "K5": fig_K5,
-               "K6": fig_K6, "K7": fig_K7, "K8": fig_K8, "K9": fig_K9}
+               "K6": fig_K6, "K7": fig_K7, "K8": fig_K8, "K9": fig_K9, "CMP": fig_CMP}
     for key, fn in allfigs.items():
         if only and key not in only:
             continue
