@@ -49,3 +49,4 @@ package-lock.json
 # Resultado gerado pela recalibração de FLI
 work/recalibrate_result.json
 work/beta_tuning_result.json
+work/lambda_max_user.png

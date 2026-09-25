@@ -2,7 +2,7 @@
 const fs = require("fs");
 const {
   Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType,
-  ImageRun, Table, TableRow, TableCell, WidthType, ShadingType, BorderStyle,
+  ImageRun, Table, TableRow, TableCell, WidthType, ShadingType, BorderStyle, PageBreak,
 } = require("docx");
 
 const IMG = "/home/user/Chaos/work";
@@ -15,6 +15,8 @@ function img(file, wpx) {
     "K2_secoes_preview.png": 1.25, "K8_secoes_2p5GL_preview.png": 1.25,
     "K6_amortecimento_preview.png": 1.786, "K9_amortecimento_2p5GL_preview.png": 1.25,
     "K4_fracao_preview.png": 1.4, "K1_esqueleto_preview.png": 1.833,
+    "RECAL_classificador_preview.png": 2.609, "nonlinearity_criterion_preview.png": 2.4,
+    "FRF_vs_KAM_preview.png": 2.935, "lambda_max_user.png": 2.143,
   };
   const asp = dims[file];
   return new Paragraph({
@@ -167,10 +169,75 @@ const children = [
   img("K9_amortecimento_2p5GL_preview.png", 600),
   cap("Figura 8 — K9: amortecimento no sistema completo de 2,5 GL (pares ζ₁, ζ₂)."),
 
-  H1("5. Conclusões"),
-  P([T("• O absorvedor sempre reduz a regularidade — a inclusão do 2º grau de liberdade abre ressonâncias adicionais que quebram toros KAM.", {})]),
-  P([T("• O efeito é máximo em forçamento intermediário (f ≈ 0,05) e nos regimes monostable e shallow wells; deep wells resistem.", {})]),
-  P([T("• As seções de Poincaré e os mapas FLI concordam quantitativamente (mais caos ⇄ menos toros).", {})]),
+  new Paragraph({ children: [new PageBreak()] }),
+  H1("5. O caos extra é real? Recalibração dimensão‑independente"),
+  P([
+    T("Uma dúvida metodológica legítima: o FLI de uma órbita regular cresce como log(t), e o seu ", {}),
+    T("valor absoluto é maior em 4D (2,5 GL) do que em 2D (1,5 GL)", { bold: true }),
+    T(" porque o toro tem mais frequências — então um limiar fixo poderia contar caos a mais no 2,5 GL. A cura é classificar pela ", {}),
+    T("taxa de crescimento", { bold: true }),
+    T(" do FLI entre T e 2T: uma órbita regular cresce ≈ log₁₀(2) ≈ 0,30 ao dobrar o tempo, em qualquer dimensão; uma caótica cresce ordens de grandeza mais. Isso remove o viés dimensional."),
+  ]),
+  img("RECAL_classificador_preview.png", 620),
+  cap("Figura 9 — Recalibração: (A) para o 2,5 GL, o classificador por lei de crescimento concorda com o limiar absoluto; (B) a diferença 1,5→2,5 GL persiste sob os dois critérios."),
+  P([
+    T("Resultado: a diferença de caos entre os sistemas é ", {}),
+    T("praticamente idêntica", { bold: true }),
+    T(" sob os dois critérios — e ligeiramente maior sob a lei de crescimento (monostable f=0,05: Δ=−49 → −54 p.p.; shallow: −46 → −48; deep: −2 → −2). ", {}),
+    T("Conclusão: o excesso de caos do QZS‑ADV é genuíno, não artefato de medir FLI em 4D.", { bold: true }),
+  ]),
+
+  H1("6. Critério: não linearidade × diferença de caos"),
+  P([
+    T("O caos extra do 2,5 GL vem da ", {}),
+    T("ressonância interna primário↔absorvedor", { bold: true }),
+    T(", que ocorre onde a frequência do primário iguala a natural do absorvedor: ω(E) = ω_a = β. A não linearidade entra pela relação frequência‑amplitude ω(E): o QZS achata o potencial (rigidez local ω₀ baixa), o que aproxima a frequência de operação de ω_a e coloca a ressonância dentro do núcleo regular."),
+  ]),
+  img("nonlinearity_criterion_preview.png", 620),
+  cap("Figura 10 — Critério: a energia dE_res da ressonância interna (ω(E)=ω_a) prediz a amplificação do caos. Ressonância no núcleo ⇒ muito caos extra; na barreira ⇒ quase nenhum."),
+  P([
+    T("A correlação é monotônica e nítida: ω₀=0,00 → dE_res=0,005 → +54 p.p.; ω₀=0,65 → 0,007 → +48; ω₀=1,56 → 0,42 → +2. ", {}),
+    T("Ponto‑chave: é a própria não linearidade do QZS que torna o sistema vulnerável ao absorvedor", { bold: true }),
+    T(" — não o contrário. Os deep wells, mais rígidos nos mínimos (ω₀≫ω_a), operam longe da frequência do absorvedor e resistem."),
+  ]),
+
+  H1("7. Comparação com o mapa λ_max(f, η) (regime amortecido)"),
+  P([
+    T("O mapa do maior expoente de Lyapunov λ_max no plano (f, η), com ζ₁=0,01, é o regime forçado‑amortecido — onde atua a antirressonância. Ele confirma o critério: ", {}),
+    T("o caos vive só no poço (α<0); o monostable (α>0) é regular.", { bold: true }),
+  ]),
+  img("lambda_max_user.png", 560),
+  cap("Figura 11 — Mapa λ_max(f, η): (a) QZS‑ADV, (b) QZS (figura do autor). Caos concentrado no poço duplo (α<0)."),
+  P([
+    T("Os dois regimes se conciliam: no ", {}),
+    T("conservativo", { bold: true }),
+    T(" o absorvedor abre ressonâncias internas (mais caos estrutural, nossos mapas FLI); no ", {}),
+    T("forçado‑amortecido", { bold: true }),
+    T(" essas ressonâncias viram janelas periódicas e a dissipação reduz λ_max. Previsão falsificável: a diferença entre (a) e (b) deve ser máxima logo abaixo de η_QZS e encolher à medida que η diminui (poço mais fundo tira a ressonância do núcleo)."),
+  ]),
+
+  H1("8. Sintonia β do absorvedor: antirressonância (FRF) × KAM"),
+  P([
+    T("A antirressonância do primário (resposta mínima no FRF linearizado) ocorre em ω=β; para silenciar o primário no forçamento (Ω=1) é preciso ", {}),
+    T("β ≈ 1", { bold: true }),
+    T(". O baseline β=0,35 quase não aproveita a antirressonância (amplitude 73–89% maior que no ótimo). Varrendo β no sistema conservativo, a fração regular KAM revela três regiões:"),
+  ]),
+  P([T("• β ≈ 0,35 (baseline): sem antirressonância e KAM já em queda (22–31%) — ruim/ruim.", {})]),
+  P([T("• β ≈ 0,5–0,9 (vale): pico de ressonância acoplada no FRF e caos quase total (0–2%) — péssimo/péssimo.", {})]),
+  P([T("• β ≈ 1,0 (antirressonância): amplitude mínima do primário e recuperação do KAM (36–73%) — ótimo/bom.", {})]),
+  img("FRF_vs_KAM_preview.png", 640),
+  cap("Figura 12 — Sintonia β: amplitude do primário no FRF (vermelho) e fração regular KAM (azul). A antirressonância (β≈1) coincide com a recuperação do KAM; o vale de caos coincide com o pico de ressonância acoplada."),
+  P([
+    T("Os dois critérios se alinham porque são a mesma física de casamento de frequências: em β=Ω=1 a ressonância interna ω(E)=β=1 é empurrada para energia alta (dE≈0,6, fora do núcleo), protegendo os toros, enquanto o absorvedor cancela a excitação. ", {}),
+    T("Ressalva de projeto:", { bold: true }),
+    T(" a sintonia precisa ser precisa — logo abaixo de β=1 estão o pico de ressonância e o vale de caos, e no deep wells há um mergulho abrupto do KAM em β≈1,06."),
+  ]),
+
+  H1("9. Conclusões"),
+  P([T("• O absorvedor sempre reduz a regularidade no espaço de fase conservativo — o 2º grau de liberdade abre ressonâncias internas que quebram toros KAM. O efeito é genuíno (confirmado por classificação dimensão‑independente), não artefato.", {})]),
+  P([T("• O efeito é máximo em forçamento intermediário (f≈0,05) e nos regimes monostable/shallow wells; deep wells resistem — governado pela posição da ressonância interna ω(E)=β (critério de não linearidade).", {})]),
+  P([T("• Regimes distintos, mesma física: no conservativo o absorvedor abre ressonâncias (mais caos estrutural); no amortecido (mapa λ_max) ele pode suavizar o caos e reduzir a amplitude (antirressonância).", {})]),
+  P([T("• Sintonia: o baseline β=0,35 é mal escolhido (sem antirressonância, KAM em queda). β=Ω=1 entrega a antirressonância no forçamento E coloca o sistema numa janela KAM‑segura — desde que a sintonia seja precisa.", {})]),
   P([T("• A equivalência numérica com o cálculo original foi confirmada: a fração regular de shallow wells em 2,5 GL reproduz exatamente [0,823; 0,332; 0,196].", {})]),
 
   new Paragraph({ spacing: { before: 240 }, border: { top: { style: BorderStyle.SINGLE, size: 6, color: "CCCCCC", space: 8 } },
