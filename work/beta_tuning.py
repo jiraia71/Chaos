@@ -21,11 +21,13 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 import numpy as np
 
 import kam_compute as K
+CHAOS_ROOT = os.environ.get("CHAOS_ROOT") or os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+WORK = os.path.join(CHAOS_ROOT, "work")
 
 NAMES = ["monostable", "shallow_wells", "deep_wells"]
 FFORCE = 0.05
 TAU = 1.0
-OUT = os.environ.get("KAM_OUT", "/home/user/Chaos/work/beta_tuning_result.json")
+OUT = os.environ.get("KAM_OUT", f"{WORK}/beta_tuning_result.json")
 
 PRESET = {"preview": dict(nx=40, snaps=(60, 120), ns=40, betas=np.linspace(0.15, 1.8, 8)),
           "full":    dict(nx=84, snaps=(200, 400), ns=100, betas=np.round(np.linspace(0.15, 1.9, 24), 3))}

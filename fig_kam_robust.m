@@ -42,7 +42,7 @@ for r=1:3
     put_rot(L,5,y0+(3-r)*(sz+gy)+sz/2,labels{r},9.5);
 end
 cb=mm_axes(fig,W,H,x0,7,52,2);manual_colorbar(cb,cmap,[0 5 10 15 20]/20,'%g',[0 5 10 15 20]);
-put_left(L,x0+54,8,'FLI apos 400 periodos do drive (escuro: toros KAM; claro: caos)',8);
+put_left(L,x0+54,8,'FLI apos 400 periodos do drive (escuro: regularidade; claro: caos)',8);
 put_left(L,x0,3,sprintf('sistema 2.5 GL, \\it\\zeta\\rm = 0, \\itf\\rm = %g, excitacao \\it\\Omega\\rm = %.2f; incerteza de sintonia \\it\\beta\\rm = \\it\\Omega\\rm \\pm %.0f%% (\\pm%.2f)',ff,om,pct,del),8);
 put_text(L,W/2,173,sprintf('Robustez da sintonia \\it\\beta\\rm = \\it\\Omega\\rm = %.2f a uma incerteza de \\pm%.0f%%',om,pct),12.5);
 export_figure(fig,fullfile(out,sprintf('KAM_robustez_omega%.2f',om)),dpi);close(fig);

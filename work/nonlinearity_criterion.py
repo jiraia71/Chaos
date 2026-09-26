@@ -17,6 +17,7 @@ do caos — dE_res no núcleo (baixa energia) ⇒ grande amplificação; dE_res 
 
 Gera nonlinearity_criterion.png e imprime a tabela do critério.
 """
+import os
 import json
 
 import numpy as np
@@ -24,10 +25,12 @@ from scipy.io import loadmat
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+CHAOS_ROOT = os.environ.get("CHAOS_ROOT") or os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+WORK = os.path.join(CHAOS_ROOT, "work")
 
-MAT = "/home/user/Chaos/dados_kam.mat"
-RECAL = "/home/user/Chaos/work/recalibrate_result.json"
-OUT = "/home/user/Chaos/work/nonlinearity_criterion_preview.png"
+MAT = f"{CHAOS_ROOT}/dados_kam.mat"
+RECAL = f"{WORK}/recalibrate_result.json"
+OUT = f"{WORK}/nonlinearity_criterion_preview.png"
 BETA = float(np.sqrt(0.1225))   # ω_a: frequência natural do absorvedor
 ECUT = 0.5
 NAMES = ["monostable", "shallow_wells", "deep_wells"]

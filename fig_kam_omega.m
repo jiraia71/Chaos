@@ -34,7 +34,7 @@ for c=1:3
     if c==1, ylabel(ax,'d\itX\rm_0/d\itt'); else, set(ax,'YTickLabel',[]); end
 end
 cb=mm_axes(fig,W,H,x0,9,52,2);manual_colorbar(cb,cmap,[0 5 10 15 20]/20,'%g',[0 5 10 15 20]);
-put_left(L,x0+54,10,'FLI apos 400 periodos do drive (escuro: toros KAM; claro: caos)',8);
+put_left(L,x0+54,10,'FLI apos 400 periodos do drive (escuro: regularidade; claro: caos)',8);
 put_left(L,x0,4.5,sprintf('sistema completo 2.5 GL, limite conservativo \\it\\zeta\\rm = 0, \\itf\\rm = %g, \\it\\mu\\rm = 0.1; branco pontilhado: \\itH\\rm_0 - \\itU\\rm_{min} = 0.5',ff),8);
 put_text(L,W/2,88,sprintf('QZS-ADV excitado em \\it\\Omega\\rm = %.2f com absorvedor sintonizado \\it\\beta\\rm = %.2f  (\\it\\beta\\rm = \\it\\Omega\\rm: antirressonancia)',om,be),12);
 export_figure(fig,fullfile(out,sprintf('KAM_omega%.2f_beta%.2f',om,be)),dpi);close(fig);

@@ -142,7 +142,7 @@ const children = [
   H2("4.1 Mapas FLI — 1,5 GL vs 2,5 GL"),
   P("Nos mapas do indicador de Lyapunov rápido (escuro = toros KAM regulares; claro = caos), a mancha vermelha de caos cresce visivelmente ao ligar o absorvedor, sobretudo em f = 0,05."),
   img("K3_FLI_preview.png", 600),
-  cap("Figura 2 — K3: mapas FLI do sistema QZS de 1,5 GL (absorvedor congelado)."),
+  cap("Figura 2 — K3: mapas FLI do sistema QZS de 1,5 GL (sem absorvedor)."),
   img("K7_FLI_2p5GL_preview.png", 470),
   cap("Figura 3 — K7: mapas FLI do sistema completo QZS‑ADV de 2,5 GL."),
 
@@ -239,6 +239,18 @@ const children = [
   P([T("• Regimes distintos, mesma física: no conservativo o absorvedor abre ressonâncias (mais caos estrutural); no amortecido (mapa λ_max) ele pode suavizar o caos e reduzir a amplitude (antirressonância).", {})]),
   P([T("• Sintonia: o baseline β=0,35 é mal escolhido (sem antirressonância, KAM em queda). β=Ω=1 entrega a antirressonância no forçamento E coloca o sistema numa janela KAM‑segura — desde que a sintonia seja precisa.", {})]),
   P([T("• A equivalência numérica com o cálculo original foi confirmada: a fração regular de shallow wells em 2,5 GL reproduz exatamente [0,823; 0,332; 0,196].", {})]),
+
+  H1("10. Limitações e nota metodológica"),
+  P([T("• \"Regular\" (pelo FLI) não é o mesmo que \"toro KAM\". O FLI e o critério de crescimento medem regularidade (crescimento não exponencial do vetor tangente), condição necessária mas não suficiente para um toro KAM. A teoria KAM exige integrabilidade do sistema não perturbado, não degenerescência e perturbação pequena, que não são verificadas aqui para o sistema acoplado. Onde não há prova adicional, leia \"regularidade indicada pelo FLI\".", {})]),
+  P([T("• As frações percentuais referem-se à superfície de condições iniciais escolhida (mapa em X₀, dX₀/dt com o absorvedor em Z = W = 0), não ao espaço de fases 4D completo.", {})]),
+  P([T("• O sistema completo com absorvedor não se torna integrável ao fazer f = 0: é um Hamiltoniano de 2 GL acoplado, genericamente não integrável.", {})]),
+  P([T("• Modelo reduzido de 1,5 GL: descrito corretamente como \"sem absorvedor\" (H₁ = p²/2 + U(X) − f·X·cos Ωt), não como \"absorvedor congelado\".", {})]),
+  P([T("• As projeções em (X, dX/dt) do sistema 2.5 GL não permitem, por si só, identificar caos pela aparência de nuvem (um toro 2D projetado borra); a classificação usa o FLL/lei de crescimento, não a imagem.", {})]),
+  P([
+    T("• Propriedade forte de β = Ω (verificada numericamente): a substituição X₂ = Y₂ − (f/μβ²)·cos(Ωt) elimina a dependência explícita do tempo quando β = Ω, tornando o sistema forçado ", {}),
+    T("exatamente autônomo", { bold: true }),
+    T(" (2 GL, energia conservada a ~10⁻⁸), inclusive com o potencial não linear. Isso fundamenta a importância da sintonia β = Ω além da antirressonância linear — mas autônomo não significa integrável, então não prova ausência de caos.", {}),
+  ]),
 
   new Paragraph({ spacing: { before: 240 }, border: { top: { style: BorderStyle.SINGLE, size: 6, color: "CCCCCC", space: 8 } },
     children: [new TextRun({ text: "Nota: as imagens deste relatório são prévias geradas em Python (matplotlib) a partir de dados_kam.mat, para inspeção. As figuras finais de publicação (fundo transparente, PDF vetorial, 1900 dpi) são produzidas por fig_qzs_kam.m no MATLAB (fig_qzs_kam(1900)).", italics: true, size: 18, color: "777777" })] }),

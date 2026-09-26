@@ -15,6 +15,8 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 
 import kam_compute as K
+CHAOS_ROOT = os.environ.get("CHAOS_ROOT") or os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+WORK = os.path.join(CHAOS_ROOT, "work")
 
 NAMES = ["monostable", "shallow_wells", "deep_wells"]
 LAB = {"monostable": "Monostable  (ω₀=0)", "shallow_wells": "Shallow wells  (ω₀=0,65)", "deep_wells": "Deep wells  (ω₀=1,56)"}
@@ -49,7 +51,7 @@ def snap_map(nm, beta):
         nrm = np.sqrt(d[0]**2 + d[1]**2 + d[2]**2 + d[3]**2); logg += np.log10(nrm); d = [q / nrm for q in d]
         if (c + 1) in SNAPS:
             snaps[c + 1] = logg.copy()
-    H0 = .5 * V.ravel()**2 + K.U(x, eta) - K.U(K.xmin(eta), eta)
+    H0 = .5 * V.ravel()**2 + K.U(X.ravel(), eta) - K.U(K.xmin(eta), eta)   # posição INICIAL da malha
     inside = H0 <= K.ECUT
     growth = snaps[SNAPS[1]] - snaps[SNAPS[0]]
     reg = float(np.mean(growth[inside] <= 1.0))
@@ -88,7 +90,7 @@ def main():
                 ax.set_xlabel("X₀", fontsize=9)
     fig.colorbar(im, ax=axes, shrink=.4, label="FLI após 400 períodos (escuro: toros KAM; claro: caos)")
     fig.suptitle("Toros KAM (2.5 GL conservativo, f=0,05) vs sintonia β do absorvedor", fontsize=13)
-    p = "/home/user/Chaos/work/KAM_beta_tuning_preview.png"; fig.savefig(p, dpi=140); print("salvo", p)
+    p = f"{WORK}/KAM_beta_tuning_preview.png"; fig.savefig(p, dpi=140); print("salvo", p)
 
 
 if __name__ == "__main__":

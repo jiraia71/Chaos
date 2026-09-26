@@ -8,6 +8,7 @@ enquanto o baseline β=0.35 e o vale β≈0.5–0.9 são ruins nos dois critéri
 
 Requer beta_tuning_result.json (rode beta_tuning.py --full antes).
 """
+import os
 import json
 
 import numpy as np
@@ -15,11 +16,13 @@ from scipy.io import loadmat
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+CHAOS_ROOT = os.environ.get("CHAOS_ROOT") or os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+WORK = os.path.join(CHAOS_ROOT, "work")
 
 MU, W, Z1, Z2 = 0.1, 1.0, 0.01, 0.01   # μ, Ω, ζ1, ζ2
-MAT = "/home/user/Chaos/dados_kam.mat"
-RES = "/home/user/Chaos/work/beta_tuning_result.json"
-OUT = "/home/user/Chaos/work/FRF_vs_KAM_preview.png"
+MAT = f"{CHAOS_ROOT}/dados_kam.mat"
+RES = f"{WORK}/beta_tuning_result.json"
+OUT = f"{WORK}/FRF_vs_KAM_preview.png"
 NAMES = ["monostable", "shallow_wells", "deep_wells"]
 LAB = {"monostable": "Monostable", "shallow_wells": "Shallow wells", "deep_wells": "Deep wells"}
 

@@ -24,8 +24,10 @@ import numpy as np
 from scipy.io import loadmat, savemat
 
 import kam_compute as K
+CHAOS_ROOT = os.environ.get("CHAOS_ROOT") or os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+WORK = os.path.join(CHAOS_ROOT, "work")
 
-SRC = Path(os.environ.get("KAM_SRC", "/home/user/Chaos/dados_kam.mat"))
+SRC = Path(os.environ.get("KAM_SRC", f"{CHAOS_ROOT}/dados_kam.mat"))
 
 # resolution knobs: (map grid nx, map periods, map steps/period,
 #                    section periods, section steps, damping periods, damping steps)

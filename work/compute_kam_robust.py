@@ -11,12 +11,18 @@ import numpy as np
 from scipy.io import savemat
 
 import kam_compute as K
+CHAOS_ROOT = os.environ.get("CHAOS_ROOT") or os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+WORK = os.path.join(CHAOS_ROOT, "work")
 
 NAMES = ["monostable", "shallow_wells", "deep_wells"]
 LABELS = ["Monostable", "Shallow wells", "Deep wells"]
 OMEGA = float(os.environ.get("KAM_OMEGA", "0.35"))
 B0 = float(os.environ.get("KAM_BETA0", "0.35"))
-DELTA = float(os.environ.get("KAM_DELTA", "0.10"))
+# incerteza: KAM_PCT (percentual, padrão 20%); KAM_DELTA (absoluto) tem prioridade se definido
+if os.environ.get("KAM_DELTA"):
+    DELTA = float(os.environ["KAM_DELTA"])
+else:
+    DELTA = round(B0 * float(os.environ.get("KAM_PCT", "20")) / 100.0, 3)
 BETAS = [round(B0 - DELTA, 3), round(B0, 3), round(B0 + DELTA, 3)]
 FFORCE = float(os.environ.get("KAM_F", "0.05"))
 NX = int(os.environ.get("KAM_NX", "200"))
@@ -48,7 +54,7 @@ def snap_map(nm, beta):
         nrm = np.sqrt(d[0]**2 + d[1]**2 + d[2]**2 + d[3]**2); logg += np.log10(nrm); d = [q / nrm for q in d]
         if (c + 1) in SNAPS:
             snaps[c + 1] = logg.copy()
-    H0 = .5 * V.ravel()**2 + K.U(x, eta) - K.U(K.xmin(eta), eta); inside = H0 <= K.ECUT
+    H0 = .5 * V.ravel()**2 + K.U(X.ravel(), eta) - K.U(K.xmin(eta), eta); inside = H0 <= K.ECUT  # posição INICIAL
     reg = float(np.mean((snaps[SNAPS[1]] - snaps[SNAPS[0]])[inside] <= 1.0))
     return nm, beta, xs, vs, snaps[SNAPS[1]].reshape(NX, NX).astype(np.float32), reg
 
@@ -72,7 +78,7 @@ def main():
         B[nm] = dict(eta=eta, xw=m["xw"], vw=m["vw"], Umin=float(Um), depth=float(depth),
                      xs=xs.reshape(1, -1), vs=vs.reshape(1, -1), maps=maps, reg=reg, label=lab)
     tag = f"omega{OMEGA:g}_robust".replace(".", "p")
-    out = f"/home/user/Chaos/dados_kam_{tag}.mat"
+    out = f"{CHAOS_ROOT}/dados_kam_{tag}.mat"
     savemat(out, dict(B=B), do_compression=True, oned_as="column")
     print(f"salvo {out} ({os.path.getsize(out)/1e6:.2f} MB), nx={NX}, Ω={OMEGA}, β={BETAS}")
 

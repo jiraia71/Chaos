@@ -12,6 +12,8 @@ import numpy as np
 from scipy.io import savemat
 
 import kam_compute as K
+CHAOS_ROOT = os.environ.get("CHAOS_ROOT") or os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+WORK = os.path.join(CHAOS_ROOT, "work")
 
 NAMES = ["monostable", "shallow_wells", "deep_wells"]
 LABELS = ["Monostable", "Shallow wells", "Deep wells"]
@@ -43,7 +45,7 @@ def snap_map(nm, beta):
         nrm = np.sqrt(d[0]**2 + d[1]**2 + d[2]**2 + d[3]**2); logg += np.log10(nrm); d = [q / nrm for q in d]
         if (c + 1) in SNAPS:
             snaps[c + 1] = logg.copy()
-    H0 = .5 * V.ravel()**2 + K.U(x, eta) - K.U(K.xmin(eta), eta); inside = H0 <= K.ECUT
+    H0 = .5 * V.ravel()**2 + K.U(X.ravel(), eta) - K.U(K.xmin(eta), eta); inside = H0 <= K.ECUT  # posição INICIAL
     reg = float(np.mean((snaps[SNAPS[1]] - snaps[SNAPS[0]])[inside] <= 1.0))
     return nm, beta, xs, vs, snaps[SNAPS[1]].reshape(NX, NX).astype(np.float32), reg
 
@@ -68,7 +70,7 @@ def main():
         reg = np.array([res[(nm, b)][3] for b in BETAS]).reshape(1, -1)
         B[nm] = dict(eta=eta, xw=m["xw"], vw=m["vw"], Umin=float(Um), depth=float(depth),
                      xs=xs.reshape(1, -1), vs=vs.reshape(1, -1), maps=maps, reg=reg, label=lab)
-    out = "/home/user/Chaos/dados_kam_beta.mat"
+    out = f"{CHAOS_ROOT}/dados_kam_beta.mat"
     savemat(out, dict(B=B), do_compression=True, oned_as="column")
     print(f"salvo {out} ({os.path.getsize(out)/1e6:.2f} MB), nx={NX}")
 

@@ -43,10 +43,10 @@ for r=1:3
     put_rot(L,5,y0+(3-r)*(sz+gy)+sz/2,labels{r},9.5);
 end
 cb=mm_axes(fig,W,H,x0,7,52,2);manual_colorbar(cb,cmap,[0 5 10 15 20]/20,'%g',[0 5 10 15 20]);
-put_left(L,x0+54,8,'FLI apos 400 periodos (escuro: toros KAM; claro: caos)',8);
+put_left(L,x0+54,8,'FLI apos 400 periodos (escuro: regularidade; claro: caos)',8);
 put_left(L,x0,3,['sistema completo 2.5 GL (com absorvedor), limite conservativo \it\zeta\rm = 0, \itf\rm = 0.05, \it\mu\rm = 0.1;' ...
     '  branco pontilhado: \itH\rm_0 - \itU\rm_{min} = 0.5'],8);
-put_text(L,W/2,171,'Toros KAM do QZS-ADV versus a sintonia \it\beta\rm do absorvedor',12.5);
+put_text(L,W/2,171,'Regularidade (indicador FLI) do QZS-ADV versus a sintonia \it\beta\rm',12.5);
 export_figure(fig,fullfile(out,'KAM_sintonia_beta'),dpi);close(fig);
 fprintf('Figura salva em: %s\n',out);
 end

@@ -2,6 +2,7 @@
 Reproduz K7 (mapas FLI 2.5 GL), K8 (secoes de Poincare 2.5 GL) e K9
 (amortecimento 2.5 GL) a partir de dados_kam.mat, para inspecao rapida sem MATLAB.
 """
+import os
 import sys
 import numpy as np
 import matplotlib
@@ -9,9 +10,11 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 from scipy.io import loadmat
+CHAOS_ROOT = os.environ.get("CHAOS_ROOT") or os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+WORK = os.path.join(CHAOS_ROOT, "work")
 
-MAT = sys.argv[1] if len(sys.argv) > 1 else "/home/user/Chaos/dados_kam.mat"
-OUT = sys.argv[2] if len(sys.argv) > 2 else "/home/user/Chaos/work"
+MAT = sys.argv[1] if len(sys.argv) > 1 else f"{CHAOS_ROOT}/dados_kam.mat"
+OUT = sys.argv[2] if len(sys.argv) > 2 else f"{CHAOS_ROOT}/work"
 
 NAMES = ["monostable", "shallow_wells", "deep_wells"]
 LABELS = ["Monostable  (η=η_QZS)", "Shallow wells  (η=0.60)", "Deep wells  (η=0.30)"]
@@ -81,7 +84,7 @@ def fig_K7(D):
                 ax.set_ylabel(LABELS[r] + "\n dX/dt", fontsize=8)
             if r == 2:
                 ax.set_xlabel("X₀", fontsize=9)
-    fig.colorbar(im, ax=axes, shrink=.5, label="FLI após 400 períodos (escuro: toros KAM; claro: caos)")
+    fig.colorbar(im, ax=axes, shrink=.5, label="FLI após 400 períodos (escuro: regularidade; claro: caos)")
     fig.suptitle("K7 — FLI do sistema completo QZS-ADV (2.5 GL), limite conservativo", fontsize=12)
     p = f"{OUT}/K7_FLI_2p5GL_preview.png"; fig.savefig(p, dpi=130); plt.close(fig); return p
 
@@ -241,14 +244,14 @@ def _fli_grid(D, mapk, xsk, vsk, fk, title, fname):
                 ax.set_ylabel(LABELS[r] + "\n dX₀/dt", fontsize=8)
             if r == 2:
                 ax.set_xlabel("X₀", fontsize=9)
-    fig.colorbar(im, ax=axes, shrink=.5, label="FLI após 400 períodos (escuro: toros KAM; claro: caos)")
+    fig.colorbar(im, ax=axes, shrink=.5, label="FLI após 400 períodos (escuro: regularidade; claro: caos)")
     fig.suptitle(title, fontsize=12)
     p = f"{OUT}/{fname}"; fig.savefig(p, dpi=130); plt.close(fig); return p
 
 
 def fig_K2(D):
     return _sections(D, "sec_pts", "sec_fli", "sec_E0", "sec_f",
-                     "K2 — Quebra dos toros: seções de Poincaré (1.5 GL, absorvedor congelado)", "K2_secoes_preview.png")
+                     "K2 — Quebra dos toros: seções de Poincaré (1.5 GL, sem absorvedor)", "K2_secoes_preview.png")
 
 
 def fig_K3(D):
@@ -276,7 +279,7 @@ def fig_K4(D):
 def fig_K5(D):
     C = D["shallow_wells"]; af = g(C, "abs_f").ravel(); ff = g(C, "fli_f").ravel()
     fig, axes = plt.subplots(2, len(af), figsize=(9, 6), constrained_layout=True)
-    rows = ["1.5 GL (absorvedor congelado)", "2.5 GL (com absorvedor)"]
+    rows = ["1.5 GL (sem absorvedor)", "2.5 GL (com absorvedor)"]
     im = None
     for c, f in enumerate(af):
         k = int(np.argmin(np.abs(ff - f)))

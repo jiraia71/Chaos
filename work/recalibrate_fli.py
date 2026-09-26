@@ -23,11 +23,13 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 import numpy as np
 
 import kam_compute as K
+CHAOS_ROOT = os.environ.get("CHAOS_ROOT") or os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+WORK = os.path.join(CHAOS_ROOT, "work")
 
 NAMES = ["monostable", "shallow_wells", "deep_wells"]
 FS = [0.01, 0.05, 0.15]
 TAU = float(os.environ.get("KAM_TAU", "1.0"))
-OUT = os.environ.get("KAM_OUT", "/home/user/Chaos/work/recalibrate_result.json")
+OUT = os.environ.get("KAM_OUT", f"{WORK}/recalibrate_result.json")
 
 PRESET = {"preview": dict(nx=48, snaps=(60, 120), ns=40),
           "full":    dict(nx=160, snaps=(200, 400), ns=100)}

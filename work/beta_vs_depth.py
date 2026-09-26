@@ -8,6 +8,7 @@ em β baixo-médio, enquanto poços profundos são robustos exceto por um pico e
 
 Requer beta_tuning_result.json (rode beta_tuning.py --full antes) e dados_kam.mat.
 """
+import os
 import json
 
 import numpy as np
@@ -15,10 +16,12 @@ from scipy.io import loadmat
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+CHAOS_ROOT = os.environ.get("CHAOS_ROOT") or os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+WORK = os.path.join(CHAOS_ROOT, "work")
 
-MAT = "/home/user/Chaos/dados_kam.mat"
-RES = "/home/user/Chaos/work/beta_tuning_result.json"
-OUT = "/home/user/Chaos/work/beta_vs_depth_preview.png"
+MAT = f"{CHAOS_ROOT}/dados_kam.mat"
+RES = f"{WORK}/beta_tuning_result.json"
+OUT = f"{WORK}/beta_vs_depth_preview.png"
 ECUT = 0.5
 COLS = {"monostable": "#1f4e8c", "shallow_wells": "#e0a020", "deep_wells": "#bc4b51"}
 LAB = {"monostable": "Monostable (ω₀=0)", "shallow_wells": "Shallow wells (ω₀=0,65)", "deep_wells": "Deep wells (ω₀=1,56)"}
