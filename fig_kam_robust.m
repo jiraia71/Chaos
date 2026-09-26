@@ -14,8 +14,8 @@ root=fileparts(mfilename('fullpath'));
 S=load(fullfile(root,'dados_kam_omega0p35_robust.mat'));B=S.B;
 names={'monostable','shallow_wells','deep_wells'};
 labels={'Monostable, \it\eta\rm = \it\eta\rm_{QZS}','Shallow wells, \it\eta\rm = 0.60','Deep wells, \it\eta\rm = 0.30'};
-om=B.omega;be=B.betas(:).';del=B.delta;ff=B.f;
-sub={sprintf('\\it\\beta\\rm_0 - %.2f (desintonia)',del),'\it\beta\rm = \it\Omega\rm (sintonizado)',sprintf('\\it\\beta\\rm_0 + %.2f (desintonia)',del)};
+om=B.omega;be=B.betas(:).';del=B.delta;ff=B.f;be0=B.beta0;pct=100*del/be0;
+sub={sprintf('\\it\\beta\\rm_0 - %.0f%% (desintonia)',pct),'\it\beta\rm = \it\Omega\rm (sintonizado)',sprintf('\\it\\beta\\rm_0 + %.0f%% (desintonia)',pct)};
 out=fullfile(root,sprintf('figuras_matlab_%ddpi',dpi));
 if ~exist(out,'dir'), mkdir(out); end
 
@@ -43,8 +43,8 @@ for r=1:3
 end
 cb=mm_axes(fig,W,H,x0,7,52,2);manual_colorbar(cb,cmap,[0 5 10 15 20]/20,'%g',[0 5 10 15 20]);
 put_left(L,x0+54,8,'FLI apos 400 periodos do drive (escuro: toros KAM; claro: caos)',8);
-put_left(L,x0,3,sprintf('sistema 2.5 GL, \\it\\zeta\\rm = 0, \\itf\\rm = %g, excitacao \\it\\Omega\\rm = %.2f; incerteza de sintonia \\it\\beta\\rm = \\it\\Omega\\rm \\pm %.2f',ff,om,del),8);
-put_text(L,W/2,173,sprintf('Robustez da sintonia \\it\\beta\\rm = \\it\\Omega\\rm = %.2f a uma incerteza de \\pm%.2f',om,del),12.5);
+put_left(L,x0,3,sprintf('sistema 2.5 GL, \\it\\zeta\\rm = 0, \\itf\\rm = %g, excitacao \\it\\Omega\\rm = %.2f; incerteza de sintonia \\it\\beta\\rm = \\it\\Omega\\rm \\pm %.0f%% (\\pm%.2f)',ff,om,pct,del),8);
+put_text(L,W/2,173,sprintf('Robustez da sintonia \\it\\beta\\rm = \\it\\Omega\\rm = %.2f a uma incerteza de \\pm%.0f%%',om,pct),12.5);
 export_figure(fig,fullfile(out,sprintf('KAM_robustez_omega%.2f',om)),dpi);close(fig);
 fprintf('Figura salva em: %s\n',out);
 end
