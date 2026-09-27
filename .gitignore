@@ -50,3 +50,5 @@ package-lock.json
 work/recalibrate_result.json
 work/beta_tuning_result.json
 work/lambda_max_user.png
+work/**/cache_mapas_fli/
+dados/cache_mapas_fli/
