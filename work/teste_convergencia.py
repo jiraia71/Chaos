@@ -53,20 +53,15 @@ def main():
                label='dt (%d passos/T)' % S.NS_SECOES)
     c = S.CASES[nm]
     ax.set_xlim(-c['xw'], c['xw']); ax.set_ylim(-c['vw'], c['vw']); ax.set_aspect('equal')
-    ax.set_xlabel('X'); ax.set_ylabel('V = dX/dt')
-    lab = 'sem absorvedor' if modelo == 1 else (r'com absorvedor, $\beta$=%.2f' % a.beta)
-    ax.set_title('Teste de convergência — %s, f=%g (%s)' % (c['rotulo'], a.f, lab), fontsize=12)
-    ax.legend(loc='upper center', fontsize=9, markerscale=10, ncol=2)
-    txt = ('Preto (dt) e azul (dt/2) sobre as mesmas curvas.\n'
-           '%d/%d órbitas mantêm a classe regular/caótica.\n'
-           'Fração caótica: %.0f%% (dt) = %.0f%% (dt/2).\n'
-           'Toros e ilhas coincidem sob refino do passo => físicos, não numéricos.'
-           % (np.sum(r1 == r2), r1.size, 100*np.mean(~r1), 100*np.mean(~r2)))
-    ax.text(0.015, 0.015, txt, transform=ax.transAxes, fontsize=8.5, va='bottom', ha='left',
-            bbox=dict(boxstyle='round,pad=0.4', fc='white', ec='0.6', alpha=0.92))
+    ax.set_xlabel('X', fontsize=17); ax.set_ylabel('V = dX/dt', fontsize=17)
+    ax.tick_params(labelsize=13)
+    lab = 'without absorber' if modelo == 1 else (r'with absorber, $\beta$=%.2f' % a.beta)
+    ax.set_title(r'Convergence test — %s, f=%g (%s);  black: dt, blue: dt/2'
+                 % (c['rotulo'], a.f, lab), fontsize=15)
     fig.tight_layout()
     fig.savefig(a.out + '.png', dpi=a.dpi)
-    print('figura salva:', a.out + '.png')
+    print('saved:', a.out + '.png', '| identical class: %s | chaos %.0f%% vs %.0f%%'
+          % (np.array_equal(r1, r2), 100*np.mean(~r1), 100*np.mean(~r2)))
 
 
 if __name__ == '__main__':

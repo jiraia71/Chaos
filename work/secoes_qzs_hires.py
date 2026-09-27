@@ -29,15 +29,15 @@ from matplotlib.colors import LinearSegmentedColormap
 OMEGA = 0.35
 MU = 0.1
 TAU = 1.0
-NORB = 64
+NORB = 80
 PSECOES = 1500
 NS_SECOES = round(200 / OMEGA)            # 571 passos por período de excitação
 FSECOES = [0.002, 0.01, 0.05, 0.15]
 
 CASES = {
-    'monostable':    dict(eta=2/3.1, xw=1.4, vw=1.4, x0max=1.25, rotulo='Monoestável (QZS)'),
-    'shallow_wells': dict(eta=0.60,  xw=1.4, vw=1.4, x0max=1.30, rotulo='Poços rasos'),
-    'deep_wells':    dict(eta=0.30,  xw=1.9, vw=1.5, x0max=1.75, rotulo='Poços profundos'),
+    'monostable':    dict(eta=2/3.1, xw=1.4, vw=1.4, x0max=1.25, rotulo='Monostable (QZS)'),
+    'shallow_wells': dict(eta=0.60,  xw=1.4, vw=1.4, x0max=1.30, rotulo='Shallow wells'),
+    'deep_wells':    dict(eta=0.30,  xw=1.9, vw=1.5, x0max=1.75, rotulo='Deep wells'),
 }
 ORDEM = ['monostable', 'shallow_wells', 'deep_wells']
 
@@ -176,41 +176,34 @@ def plotar(dados, beta, modelo, base, dpi):
             if depth > 1e-9:
                 ax.contour(XG, VG, HG, [depth], colors='0.15', linewidths=0.6, linestyles='--')
             ax.set_xlim(-xw, xw); ax.set_ylim(-vw, vw); ax.set_aspect('equal', 'box')
-            ax.tick_params(labelsize=9)
-            ax.text(0.03, 0.97, r'$\Delta$FLI>1: %.0f%%' % (100*np.mean(chaos)),
-                    transform=ax.transAxes, va='top', ha='left', fontsize=11,
+            ax.tick_params(labelsize=13)
+            ax.text(0.04, 0.96, r'$\Delta$FLI>1: %.0f%%' % (100*np.mean(chaos)),
+                    transform=ax.transAxes, va='top', ha='left', fontsize=14,
                     bbox=dict(boxstyle='round,pad=0.25', fc='white', ec='0.5', alpha=0.9))
             if r == 0:
-                ax.set_title('f = %g' % f, fontsize=14, fontweight='bold')
-            else:
-                pass
+                ax.set_title('f = %g' % f, fontsize=19, fontweight='bold')
             if r == 2:
-                ax.set_xlabel('X', fontsize=12)
+                ax.set_xlabel('X', fontsize=17)
             else:
                 ax.set_xticklabels([])
             if c == 0:
-                ax.set_ylabel('V = dX/dt', fontsize=12)
+                ax.set_ylabel('V = dX/dt', fontsize=17)
             else:
                 ax.set_yticklabels([])
         axs[r, 0].annotate('%s\n$\\eta$=%.4g' % (c0['rotulo'], eta),
-                           xy=(-0.32, 0.5), xycoords='axes fraction', rotation=90,
-                           ha='center', va='center', fontsize=12)
+                           xy=(-0.34, 0.5), xycoords='axes fraction', rotation=90,
+                           ha='center', va='center', fontsize=16)
 
     if modelo == 2:
-        tit = r'Seções de Poincaré (X, V) — com absorvedor;  $\Omega$=%.2f;  $\beta$=%.2f' % (OMEGA, beta)
-        sub = r'$\mu$=%.2f;  T=2$\pi/\Omega$;  X$_{2,0}$=X$_0$, V$_{2,0}$=V$_0$;  regular = $\Delta$FLI(%d$\to$%d T) $\leq$ %g' % (MU, PSECOES//2, PSECOES, TAU)
+        tit = r'Poincaré sections (X, V) — with absorber;  $\Omega$=%.2f,  $\beta$=%.2f' % (OMEGA, beta)
     else:
-        tit = r'Seções de Poincaré (X, V) — sem absorvedor;  $\Omega$=%.2f' % OMEGA
-        sub = r'T=2$\pi/\Omega$;  regular = $\Delta$FLI(%d$\to$%d T) $\leq$ %g' % (PSECOES//2, PSECOES, TAU)
-    fig.suptitle(tit, fontsize=17, y=0.992)
-    fig.text(0.5, 0.958, sub, ha='center', fontsize=11)
-    fig.text(0.5, 0.083, 'cinza: órbitas caóticas ($\\Delta$FLI>1);  tracejado: separatriz isolada (f=0)',
-             ha='center', fontsize=10)
-    cbax = fig.add_axes([0.30, 0.040, 0.40, 0.016])
+        tit = r'Poincaré sections (X, V) — without absorber;  $\Omega$=%.2f' % OMEGA
+    fig.suptitle(tit, fontsize=19, y=0.985)
+    cbax = fig.add_axes([0.30, 0.055, 0.40, 0.018])
     cb = fig.colorbar(sc, cax=cbax, orientation='horizontal')
-    cb.set_label('energia inicial do primário  E$_0$ $-$ U$_{min}$  (órbitas regulares)', fontsize=10)
-    cb.ax.tick_params(labelsize=9)
-    fig.subplots_adjust(left=0.07, right=0.985, top=0.915, bottom=0.13, wspace=0.08, hspace=0.12)
+    cb.set_label(r'initial energy of the primary  $E_0 - U_{\min}$  (regular orbits)', fontsize=15)
+    cb.ax.tick_params(labelsize=13)
+    fig.subplots_adjust(left=0.075, right=0.985, top=0.94, bottom=0.135, wspace=0.08, hspace=0.10)
     fig.savefig(base + '.png', dpi=dpi, facecolor='white')
     fig.savefig(base + '.pdf', facecolor='white')
     print('figuras salvas:', base + '.png', '/', base + '.pdf')

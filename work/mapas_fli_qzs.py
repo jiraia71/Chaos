@@ -128,31 +128,30 @@ def gerar(beta, base, dpi):
             ax.contour(X, V, H, [ECUT], colors='w', linewidths=0.6, linestyles=':')
             if depth > 1e-9:
                 ax.contour(X, V, H, [depth], colors='w', linewidths=0.5, linestyles='--')
-            ax.text(0.03, 0.97, 'regular* %.1f%%' % (100*reg), transform=ax.transAxes,
-                    va='top', ha='left', color='w', fontsize=11,
+            ax.text(0.04, 0.96, 'regular* %.1f%%' % (100*reg), transform=ax.transAxes,
+                    va='top', ha='left', color='w', fontsize=14,
                     bbox=dict(boxstyle='round,pad=0.25', fc=(.08, .15, .25), ec='none', alpha=0.85))
             if r == 0:
-                ax.set_title('f = %g' % f, fontsize=14, fontweight='bold')
+                ax.set_title('f = %g' % f, fontsize=19, fontweight='bold')
             if r == 1:
-                ax.set_xlabel('X$_0$', fontsize=12)
+                ax.set_xlabel(r'$X_0$', fontsize=17)
             else:
                 ax.set_xticklabels([])
             if c == 0:
-                ax.set_ylabel('V$_0$', fontsize=12)
+                ax.set_ylabel(r'$V_0$', fontsize=17)
             else:
                 ax.set_yticklabels([])
-        lab = 'Sem absorvedor' if modelo == 1 else ('Com absorvedor ($\\beta$=%.2f)' % beta)
-        axs[r, 0].annotate(lab, xy=(-0.28, 0.5), xycoords='axes fraction', rotation=90,
-                           ha='center', va='center', fontsize=12)
-    fig.suptitle(r'K5: mapas de FLI — poços rasos;  $\Omega$=%.2f;  $\beta$=%.2f' % (OMEGA, beta),
-                 fontsize=16, y=0.99)
-    fig.text(0.5, 0.945, r'regular* = fração da área com $\Delta$FLI(%d$\to$%d T) $\leq$ %g,  dentro de H$_0$-U$_{min}$ $\leq$ %.1f'
-             % (PMAPAS//2, PMAPAS, TAU, ECUT), ha='center', fontsize=10)
-    cbax = fig.add_axes([0.30, 0.045, 0.40, 0.018])
+            ax.tick_params(labelsize=13)
+        lab = 'Without absorber' if modelo == 1 else (r'With absorber ($\beta$=%.2f)' % beta)
+        axs[r, 0].annotate(lab, xy=(-0.30, 0.5), xycoords='axes fraction', rotation=90,
+                           ha='center', va='center', fontsize=16)
+    fig.suptitle(r'FLI maps — shallow wells;  $\Omega$=%.2f,  $\beta$=%.2f' % (OMEGA, beta),
+                 fontsize=19, y=0.985)
+    cbax = fig.add_axes([0.30, 0.055, 0.40, 0.020])
     cb = fig.colorbar(im, cax=cbax, orientation='horizontal')
-    cb.set_label('FLI(%dT), log$_{10}$ (escala limitada a 20)' % PMAPAS, fontsize=10)
-    cb.ax.tick_params(labelsize=9)
-    fig.subplots_adjust(left=0.08, right=0.985, top=0.9, bottom=0.13, wspace=0.06, hspace=0.1)
+    cb.set_label(r'FLI(%dT), $\log_{10}$ (scale capped at 20)' % PMAPAS, fontsize=15)
+    cb.ax.tick_params(labelsize=13)
+    fig.subplots_adjust(left=0.085, right=0.985, top=0.93, bottom=0.135, wspace=0.06, hspace=0.08)
     fig.savefig(base + '.png', dpi=dpi, facecolor='white')
     fig.savefig(base + '.pdf', facecolor='white')
     print('figuras salvas:', base + '.png', '/', base + '.pdf')
