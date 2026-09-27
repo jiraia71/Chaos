@@ -32,7 +32,7 @@ TAU = 1.0
 NORB = 80
 PSECOES = 1500
 NS_SECOES = round(200 / OMEGA)            # 571 passos por período de excitação
-FSECOES = [0.002, 0.01, 0.05, 0.15]
+FSECOES = [0.0, 0.01, 0.05, 0.15]   # 1a coluna: f=0 (nao perturbado, referencia KAM)
 
 CASES = {
     'monostable':    dict(eta=2/3.1, xw=1.4, vw=1.4, x0max=1.25, rotulo='Monostable (QZS)'),
@@ -181,7 +181,8 @@ def plotar(dados, beta, modelo, base, dpi):
                     transform=ax.transAxes, va='top', ha='left', fontsize=14,
                     bbox=dict(boxstyle='round,pad=0.25', fc='white', ec='0.5', alpha=0.9))
             if r == 0:
-                ax.set_title('f = %g' % f, fontsize=19, fontweight='bold')
+                ax.set_title('f = 0 (KAM)' if f == 0 else ('f = %g' % f),
+                             fontsize=19, fontweight='bold')
             if r == 2:
                 ax.set_xlabel('X', fontsize=17)
             else:
