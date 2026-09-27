@@ -160,7 +160,7 @@ for r=1:3
         ax=mm_axes(fig,W,H,x0+(c-1)*(sz+gx),y0+(3-r)*(sz+gy),sz,sz);
         reg=fli_panel(ax,C,squeeze(C.fli_maps(c,:,:)),C.fli_xs,C.fli_vs,cmap);
         text(ax,.03,.97,sprintf('regular %.0f%%',100*reg),'Units','normalized','VerticalAlignment','top', ...
-            'FontName','Times New Roman','FontSize',7,'Color','w');
+            'FontName','Times New Roman','FontSize',7,'Color',[.09 .07 .06],'BackgroundColor','w','Margin',.5);
         if r==1, put_text(L,x0+(c-1)*(sz+gx)+sz/2,y0+3*sz+2*gy+3.5,sprintf('\\itf\\rm = %g',C.fli_f(c)),11); end
         if r==3, xlabel(ax,'\itX\rm_0'); else, set(ax,'XTickLabel',[]); end
         if c==1, ylabel(ax,'d\itX\rm_0/d\itt'); else, set(ax,'YTickLabel',[]); end
@@ -209,7 +209,7 @@ for c=1:3
         else, M=squeeze(C.abs_maps(c,:,:));xs=C.abs_xs;vs=C.abs_vs; end
         reg=fli_panel(ax,C,M,xs,vs,cmap);
         text(ax,.03,.97,sprintf('regular %.0f%%',100*reg),'Units','normalized','VerticalAlignment','top', ...
-            'FontName','Times New Roman','FontSize',8,'Color','w');
+            'FontName','Times New Roman','FontSize',8,'Color',[.09 .07 .06],'BackgroundColor','w','Margin',.5);
         if r==1, put_text(L,x0+(c-1)*(sz+gx)+sz/2,y0+2*sz+gy+3.5,sprintf('\\itf\\rm = %g',f),11); end
         if r==2, xlabel(ax,'\itX\rm_0'); else, set(ax,'XTickLabel',[]); end
         if c==1, ylabel(ax,'d\itX\rm_0/d\itt');put_rot(L,5,y0+(2-r)*(sz+gy)+sz/2,rows{r},9);
@@ -269,7 +269,7 @@ for r=1:3
         ax=mm_axes(fig,W,H,x0+(c-1)*(sz+gx),y0+(3-r)*(sz+gy),sz,sz);
         reg=fli_panel(ax,C,squeeze(C.abs_maps(c,:,:)),C.abs_xs,C.abs_vs,cmap);
         text(ax,.03,.97,sprintf('regular %.0f%%',100*reg),'Units','normalized','VerticalAlignment','top', ...
-            'FontName','Times New Roman','FontSize',7,'Color','w');
+            'FontName','Times New Roman','FontSize',7,'Color',[.09 .07 .06],'BackgroundColor','w','Margin',.5);
         if r==1, put_text(L,x0+(c-1)*(sz+gx)+sz/2,y0+3*sz+2*gy+3.5,sprintf('\\itf\\rm = %g',C.abs_f(c)),11); end
         if r==3, xlabel(ax,'\itX\rm_0'); else, set(ax,'XTickLabel',[]); end
         if c==1, ylabel(ax,'d\itX\rm_0/d\itt'); else, set(ax,'YTickLabel',[]); end
@@ -367,8 +367,8 @@ function u=potential(x,eta), u=1.55*x.^2-3*sqrt((1.5*eta)^2+x.^2); end
 function reg=fli_panel(ax,C,M,xs,vs,cmap)
 imagesc(ax,xs,vs,min(max(M,0),20));set(ax,'YDir','normal');colormap(ax,cmap);caxis(ax,[0 20]);hold(ax,'on');
 [XG,VG]=meshgrid(xs,vs);HG=.5*VG.^2+potential(XG,C.eta)-C.Umin;
-if C.depth>0, contour(ax,XG,VG,HG,C.depth*[1 1],'LineColor','w','LineWidth',.4,'LineStyle','--'); end
-contour(ax,XG,VG,HG,.5*[1 1],'LineColor','w','LineWidth',.35,'LineStyle',':');
+if C.depth>0, contour(ax,XG,VG,HG,C.depth*[1 1],'LineColor',[.42 .20 .55],'LineWidth',.4,'LineStyle','--'); end
+contour(ax,XG,VG,HG,.5*[1 1],'LineColor',[.42 .20 .55],'LineWidth',.35,'LineStyle',':');
 xlim(ax,[xs(1) xs(end)]);ylim(ax,[vs(1) vs(end)]);style_axes(ax,8);pbaspect(ax,[1 1 1]);
 reg=mean(M(HG<=.5)<=8);
 end
@@ -377,7 +377,7 @@ function cmap=energy_colormap(n)
 cmap=interp_colors({'2b1a6f','3b5bdb','1c9fd6','20b2aa','6cc24a','e0c300','f08c00','d7263d'},n);
 end
 function cmap=fli_colormap(n)
-cmap=interp_colors({'0b1d3a','1f4e8c','3a8fb7','9ad0c2','f4e285','f4a259','bc4b51','5b1a18'},n);
+cmap=interp_colors({'17120f','3f1a13','7a2a1b','a5391f','cf6a2e','e2a049','efd9a6'},n);
 end
 function cmap=interp_colors(hex,n)
 rgb=zeros(numel(hex),3);

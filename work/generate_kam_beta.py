@@ -26,7 +26,7 @@ NX = 120
 SNAPS = (200, 400)
 NS = 100
 FLI = LinearSegmentedColormap.from_list("f", ["#" + h for h in
-      ["0b1d3a", "1f4e8c", "3a8fb7", "9ad0c2", "f4e285", "f4a259", "bc4b51", "5b1a18"]])
+      ["17120f","3f1a13","7a2a1b","a5391f","cf6a2e","e2a049","efd9a6"]])
 
 
 def snap_map(nm, beta):
