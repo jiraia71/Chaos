@@ -56,8 +56,8 @@ def main():
     ax.set_xlabel('X', fontsize=17); ax.set_ylabel('V = dX/dt', fontsize=17)
     ax.tick_params(labelsize=13)
     lab = 'without absorber' if modelo == 1 else (r'with absorber, $\beta$=%.2f' % a.beta)
-    ax.set_title(r'Convergence test — %s, f=%g (%s);  black: dt, blue: dt/2'
-                 % (c['rotulo'], a.f, lab), fontsize=15)
+    ax.set_title('Convergence test — %s, f=%g (%s)\nblack: dt,  blue: dt/2'
+                 % (c['rotulo'], a.f, lab), fontsize=14)
     fig.tight_layout()
     fig.savefig(a.out + '.png', dpi=a.dpi)
     print('saved:', a.out + '.png', '| identical class: %s | chaos %.0f%% vs %.0f%%'
