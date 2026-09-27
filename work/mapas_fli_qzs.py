@@ -8,6 +8,7 @@ K5: poços rasos, linha de cima "sem absorvedor" (1.5 GL), linha de baixo
 "com absorvedor" (2.5 GL). Colunas f = 0.01/0.05/0.15.
 """
 import argparse
+import os
 import time
 
 import numpy as np
@@ -106,20 +107,36 @@ def _cmap_fli():
     return LinearSegmentedColormap.from_list('fli', rgb, N=512)
 
 
-def gerar(beta, base, dpi):
+CACHE = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'dados', 'cache_mapas_fli')
+
+
+def get_map(eta, beta, f, modelo, cache=CACHE):
+    """Calcula (ou carrega do cache) um mapa. modelo=1 nao depende de beta."""
+    os.makedirs(cache, exist_ok=True)
+    bkey = 0.0 if modelo == 1 else beta      # sem absorvedor independe de beta
+    path = os.path.join(cache, 'map_m%d_b%.3g_f%.4g.npz' % (modelo, bkey, f))
+    if os.path.exists(path):
+        d = np.load(path)
+        return d['xs'], d['vs'], d['M'], d['G'], d['inside']
+    t0 = time.time()
+    xs, vs, M, G, inside = mapa(eta, beta, f, modelo)
+    np.savez_compressed(path, xs=xs, vs=vs, M=M.astype(np.float32),
+                        G=G.astype(np.float32), inside=inside)
+    print('  computed m%d f=%-5g (%.0fs)' % (modelo, f, time.time()-t0), flush=True)
+    return xs, vs, M, G, inside
+
+
+def gerar(beta, base, dpi, cache=CACHE):
     cmap = _cmap_fli()
     eta = CASO['eta']; Um = U(xmin(eta), eta); depth = U(0., eta) - Um
     plt.rcParams.update({'font.family': 'serif', 'mathtext.fontset': 'dejavuserif'})
-    fig, axs = plt.subplots(2, 3, figsize=(12, 8.6), dpi=dpi)
+    fig, axs = plt.subplots(2, 3, figsize=(12, 9.0), dpi=dpi)
     fig.patch.set_facecolor('white')
     im = None
     for r, modelo in enumerate([1, 2]):
         for c, f in enumerate(FMAPAS):
-            t0 = time.time()
-            xs, vs, M, G, inside = mapa(eta, beta, f, modelo)
+            xs, vs, M, G, inside = get_map(eta, beta, f, modelo, cache)
             reg = np.mean(G[inside] <= TAU)
-            print('  modelo%d f=%-5g regular*=%.1f%%  (%.0fs)'
-                  % (modelo, f, 100*reg, time.time()-t0), flush=True)
             ax = axs[r, c]
             im = ax.imshow(np.clip(M, 0, 20), origin='lower',
                            extent=[xs[0], xs[-1], vs[0], vs[-1]], aspect='equal',
@@ -132,7 +149,7 @@ def gerar(beta, base, dpi):
                     va='top', ha='left', color='w', fontsize=14,
                     bbox=dict(boxstyle='round,pad=0.25', fc=(.08, .15, .25), ec='none', alpha=0.85))
             if r == 0:
-                ax.set_title('f = %g' % f, fontsize=19, fontweight='bold')
+                ax.set_title('f = %g' % f, fontsize=18, fontweight='bold')
             if r == 1:
                 ax.set_xlabel(r'$X_0$', fontsize=17)
             else:
@@ -143,18 +160,18 @@ def gerar(beta, base, dpi):
                 ax.set_yticklabels([])
             ax.tick_params(labelsize=13)
         lab = 'Without absorber' if modelo == 1 else (r'With absorber ($\beta$=%.2f)' % beta)
-        axs[r, 0].annotate(lab, xy=(-0.40, 0.5), xycoords='axes fraction', rotation=90,
+        axs[r, 0].annotate(lab, xy=(-0.27, 0.5), xycoords='axes fraction', rotation=90,
                            ha='center', va='center', fontsize=16)
     fig.suptitle(r'FLI maps — shallow wells;  $\Omega$=%.2f,  $\beta$=%.2f' % (OMEGA, beta),
-                 fontsize=19, y=0.985)
-    cbax = fig.add_axes([0.30, 0.055, 0.40, 0.020])
+                 fontsize=18, y=0.975)
+    cbax = fig.add_axes([0.30, 0.085, 0.40, 0.020])
     cb = fig.colorbar(im, cax=cbax, orientation='horizontal')
     cb.set_label(r'FLI(%dT), $\log_{10}$ (scale capped at 20)' % PMAPAS, fontsize=15)
     cb.ax.tick_params(labelsize=13)
-    fig.subplots_adjust(left=0.11, right=0.985, top=0.93, bottom=0.135, wspace=0.06, hspace=0.08)
+    fig.subplots_adjust(left=0.145, right=0.985, top=0.905, bottom=0.185, wspace=0.06, hspace=0.08)
     fig.savefig(base + '.png', dpi=dpi, facecolor='white')
     fig.savefig(base + '.pdf', facecolor='white')
-    print('figuras salvas:', base + '.png', '/', base + '.pdf')
+    print('saved:', base + '.png', '/', base + '.pdf')
 
 
 def main():
@@ -163,7 +180,7 @@ def main():
     ap.add_argument('--dpi', type=int, default=300)
     ap.add_argument('--out', default=None)
     a = ap.parse_args()
-    base = a.out or ('mapas_fli_beta%.2f_hires' % a.beta)
+    base = a.out or ('fli_maps_beta%.2f' % a.beta)
     gerar(a.beta, base, a.dpi)
 
 
