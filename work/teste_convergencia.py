@@ -46,10 +46,11 @@ def main():
 
     plt.rcParams.update({'font.family': 'serif', 'mathtext.fontset': 'dejavuserif'})
     fig, ax = plt.subplots(figsize=(9.5, 9), dpi=a.dpi)
-    ax.scatter(p1[:, 0, r1].ravel(), p1[:, 1, r1].ravel(), s=0.7, c='k', lw=0, alpha=0.55,
-               label='dt (%d passos/T)' % S.NS_SECOES)
-    ax.scatter(p2[:, 0, r2].ravel(), p2[:, 1, r2].ravel(), s=0.7, c='#1f6fe0', lw=0, alpha=0.55,
+    # dt/2 (azul, fraco) por baixo; dt (passo maior, preto) por cima e dominante
+    ax.scatter(p2[:, 0, r2].ravel(), p2[:, 1, r2].ravel(), s=0.5, c='#4a90e2', lw=0, alpha=0.28,
                label='dt/2 (%d passos/T)' % (2*S.NS_SECOES))
+    ax.scatter(p1[:, 0, r1].ravel(), p1[:, 1, r1].ravel(), s=0.7, c='k', lw=0, alpha=0.7,
+               label='dt (%d passos/T)' % S.NS_SECOES)
     c = S.CASES[nm]
     ax.set_xlim(-c['xw'], c['xw']); ax.set_ylim(-c['vw'], c['vw']); ax.set_aspect('equal')
     ax.set_xlabel('X'); ax.set_ylabel('V = dX/dt')
