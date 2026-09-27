@@ -27,11 +27,11 @@ for r=1:3
         ax=mm_axes(fig,W,H,x0+(c-1)*(sz+gx),y0+(3-r)*(sz+gy),sz,sz);hold(ax,'on');
         M=squeeze(C.maps(c,:,:));
         imagesc(ax,xs,vs,min(max(M,0),20));set(ax,'YDir','normal');colormap(ax,cmap);caxis(ax,[0 20]);
-        if depth>0, contour(ax,XG,VG,HG,depth*[1 1],'LineColor',[.42 .20 .55],'LineWidth',.4,'LineStyle','--'); end
-        contour(ax,XG,VG,HG,.5*[1 1],'LineColor',[.42 .20 .55],'LineWidth',.35,'LineStyle',':');
+        if depth>0, contour(ax,XG,VG,HG,depth*[1 1],'LineColor','w','LineWidth',.4,'LineStyle','--'); end
+        contour(ax,XG,VG,HG,.5*[1 1],'LineColor','w','LineWidth',.35,'LineStyle',':');
         xlim(ax,[xs(1) xs(end)]);ylim(ax,[vs(1) vs(end)]);style_axes(ax,8);pbaspect(ax,[1 1 1]);
         text(ax,.03,.97,sprintf('regular %.0f%%',100*C.reg(c)),'Units','normalized','VerticalAlignment','top', ...
-            'FontName','Times New Roman','FontSize',8,'Color',[.09 .07 .06],'BackgroundColor','w','Margin',.5);
+            'FontName','Times New Roman','FontSize',8,'Color','w');
         if r==1
             put_text(L,x0+(c-1)*(sz+gx)+sz/2,y0+3*sz+2*gy+7,sprintf('\\it\\beta\\rm = %.2f',be(c)),11);
             put_text(L,x0+(c-1)*(sz+gx)+sz/2,y0+3*sz+2*gy+2.5,sub{c},8.5);
@@ -42,7 +42,7 @@ for r=1:3
     put_rot(L,5,y0+(3-r)*(sz+gy)+sz/2,labels{r},9.5);
 end
 cb=mm_axes(fig,W,H,x0,7,52,2);manual_colorbar(cb,cmap,[0 5 10 15 20]/20,'%g',[0 5 10 15 20]);
-put_left(L,x0+54,8,'FLI apos 400 periodos do drive (ambar: regularidade; escuro: caos)',8);
+put_left(L,x0+54,8,'FLI apos 400 periodos do drive (escuro: regularidade; claro: caos)',8);
 put_left(L,x0,3,sprintf('sistema 2.5 GL, \\it\\zeta\\rm = 0, \\itf\\rm = %g, excitacao \\it\\Omega\\rm = %.2f; incerteza de sintonia \\it\\beta\\rm = \\it\\Omega\\rm \\pm %.0f%% (\\pm%.2f)',ff,om,pct,del),8);
 put_text(L,W/2,173,sprintf('Robustez da sintonia \\it\\beta\\rm = \\it\\Omega\\rm = %.2f a uma incerteza de \\pm%.0f%%',om,pct),12.5);
 export_figure(fig,fullfile(out,sprintf('KAM_robustez_omega%.2f',om)),dpi);close(fig);
@@ -53,7 +53,7 @@ end
 function u=potential(x,eta), u=1.55*x.^2-3*sqrt((1.5*eta)^2+x.^2); end
 
 function cmap=fli_colormap(n)
-cmap=interp_colors({'efd9a6','e2a049','cf6a2e','a5391f','7a2a1b','3f1a13','17120f'},n);
+cmap=interp_colors({'0b1d3a','1f4e8c','3a8fb7','9ad0c2','f4e285','f4a259','bc4b51','5b1a18'},n);
 end
 function cmap=interp_colors(hex,n)
 rgb=zeros(numel(hex),3);

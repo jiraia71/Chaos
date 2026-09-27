@@ -24,7 +24,7 @@ def cmap_from(hexes):
     return LinearSegmentedColormap.from_list("c", ["#" + h for h in hexes])
 
 
-FLI = cmap_from(["efd9a6", "e2a049", "cf6a2e", "a5391f", "7a2a1b", "3f1a13", "17120f"])
+FLI = cmap_from(["0b1d3a", "1f4e8c", "3a8fb7", "9ad0c2", "f4e285", "f4a259", "bc4b51", "5b1a18"])
 ENE = cmap_from(["2b1a6f", "3b5bdb", "1c9fd6", "20b2aa", "6cc24a", "e0c300", "f08c00", "d7263d"])
 
 
@@ -74,17 +74,17 @@ def fig_K7(D):
             im = ax.imshow(np.clip(maps[c], 0, 20), origin="lower", aspect="auto",
                            extent=[xs[0], xs[-1], vs[0], vs[-1]], cmap=FLI, vmin=0, vmax=20)
             separatrix(ax, C, None, None)
-            ax.contour(XG, VG, H0, [0.5], colors=[(.42,.20,.55)], linewidths=.5, linestyles=":")
+            ax.contour(XG, VG, H0, [0.5], colors="w", linewidths=.4, linestyles=":")
             frac = float(np.mean(maps[c][H0 <= 0.5] <= 8))
             ax.text(.03, .96, f"regular {100*frac:.0f}%", transform=ax.transAxes,
-                    va="top", color="#17120f", fontsize=8, bbox=dict(fc=(1,1,1,.75),ec="none",pad=1))
+                    va="top", color="w", fontsize=8)
             if r == 0:
                 ax.set_title(f"f = {fa[c]:g}", fontsize=10)
             if c == 0:
                 ax.set_ylabel(LABELS[r] + "\n dX/dt", fontsize=8)
             if r == 2:
                 ax.set_xlabel("X₀", fontsize=9)
-    fig.colorbar(im, ax=axes, shrink=.5, label="FLI após 400 períodos (âmbar: regularidade; escuro: caos)")
+    fig.colorbar(im, ax=axes, shrink=.5, label="FLI após 400 períodos (escuro: regularidade; claro: caos)")
     fig.suptitle("K7 — FLI do sistema completo QZS-ADV (2.5 GL), limite conservativo", fontsize=12)
     p = f"{OUT}/K7_FLI_2p5GL_preview.png"; fig.savefig(p, dpi=130); plt.close(fig); return p
 
@@ -235,16 +235,16 @@ def _fli_grid(D, mapk, xsk, vsk, fk, title, fname):
             ax = axes[r, c]
             im = ax.imshow(np.clip(maps[c], 0, 20), origin="lower", aspect="auto",
                            extent=[xs[0], xs[-1], vs[0], vs[-1]], cmap=FLI, vmin=0, vmax=20)
-            separatrix(ax, C, None, None); ax.contour(XG, VG, H0, [0.5], colors=[(.42,.20,.55)], linewidths=.5, linestyles=":")
+            separatrix(ax, C, None, None); ax.contour(XG, VG, H0, [0.5], colors="w", linewidths=.4, linestyles=":")
             frac = float(np.mean(maps[c][H0 <= 0.5] <= 8))
-            ax.text(.03, .96, f"regular {100*frac:.0f}%", transform=ax.transAxes, va="top", color="#17120f", fontsize=8, bbox=dict(fc=(1,1,1,.75),ec="none",pad=1))
+            ax.text(.03, .96, f"regular {100*frac:.0f}%", transform=ax.transAxes, va="top", color="w", fontsize=8)
             if r == 0:
                 ax.set_title(f"f = {fs[c]:g}", fontsize=10)
             if c == 0:
                 ax.set_ylabel(LABELS[r] + "\n dX₀/dt", fontsize=8)
             if r == 2:
                 ax.set_xlabel("X₀", fontsize=9)
-    fig.colorbar(im, ax=axes, shrink=.5, label="FLI após 400 períodos (âmbar: regularidade; escuro: caos)")
+    fig.colorbar(im, ax=axes, shrink=.5, label="FLI após 400 períodos (escuro: regularidade; claro: caos)")
     fig.suptitle(title, fontsize=12)
     p = f"{OUT}/{fname}"; fig.savefig(p, dpi=130); plt.close(fig); return p
 
@@ -292,9 +292,9 @@ def fig_K5(D):
             eta = gs(C, "eta"); Um = gs(C, "Umin"); XG, VG = np.meshgrid(xs, vs); H0 = .5 * VG ** 2 + U(XG, eta) - Um
             im = ax.imshow(np.clip(M, 0, 20), origin="lower", aspect="auto",
                            extent=[xs[0], xs[-1], vs[0], vs[-1]], cmap=FLI, vmin=0, vmax=20)
-            separatrix(ax, C, None, None); ax.contour(XG, VG, H0, [0.5], colors=[(.42,.20,.55)], linewidths=.5, linestyles=":")
+            separatrix(ax, C, None, None); ax.contour(XG, VG, H0, [0.5], colors="w", linewidths=.4, linestyles=":")
             frac = float(np.mean(M[H0 <= 0.5] <= 8))
-            ax.text(.03, .96, f"regular {100*frac:.0f}%", transform=ax.transAxes, va="top", color="#17120f", fontsize=8, bbox=dict(fc=(1,1,1,.75),ec="none",pad=1))
+            ax.text(.03, .96, f"regular {100*frac:.0f}%", transform=ax.transAxes, va="top", color="w", fontsize=8)
             if r == 0:
                 ax.set_title(f"f = {f:g}", fontsize=10)
             if c == 0:
