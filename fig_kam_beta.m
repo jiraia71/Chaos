@@ -43,7 +43,7 @@ for r=1:3
     put_rot(L,5,y0+(3-r)*(sz+gy)+sz/2,labels{r},9.5);
 end
 cb=mm_axes(fig,W,H,x0,7,52,2);manual_colorbar(cb,cmap,[0 5 10 15 20]/20,'%g',[0 5 10 15 20]);
-put_left(L,x0+54,8,'FLI apos 400 periodos (escuro: regularidade; claro: caos)',8);
+put_left(L,x0+54,8,'FLI apos 400 periodos (ambar: regularidade; escuro: caos)',8);
 put_left(L,x0,3,['sistema completo 2.5 GL (com absorvedor), limite conservativo \it\zeta\rm = 0, \itf\rm = 0.05, \it\mu\rm = 0.1;' ...
     '  branco pontilhado: \itH\rm_0 - \itU\rm_{min} = 0.5'],8);
 put_text(L,W/2,171,'Regularidade (indicador FLI) do QZS-ADV versus a sintonia \it\beta\rm',12.5);
@@ -55,7 +55,7 @@ end
 function u=potential(x,eta), u=1.55*x.^2-3*sqrt((1.5*eta)^2+x.^2); end
 
 function cmap=fli_colormap(n)
-cmap=interp_colors({'17120f','3f1a13','7a2a1b','a5391f','cf6a2e','e2a049','efd9a6'},n);
+cmap=interp_colors({'efd9a6','e2a049','cf6a2e','a5391f','7a2a1b','3f1a13','17120f'},n);
 end
 function cmap=interp_colors(hex,n)
 rgb=zeros(numel(hex),3);

@@ -26,7 +26,7 @@ NX = 120
 SNAPS = (200, 400)
 NS = 100
 FLI = LinearSegmentedColormap.from_list("f", ["#" + h for h in
-      ["17120f","3f1a13","7a2a1b","a5391f","cf6a2e","e2a049","efd9a6"]])
+      ["efd9a6", "e2a049", "cf6a2e", "a5391f", "7a2a1b", "3f1a13", "17120f"]])
 
 
 def snap_map(nm, beta):
@@ -88,7 +88,7 @@ def main():
                 ax.set_ylabel(LAB[nm] + "\n dX₀/dt", fontsize=9)
             if r == 2:
                 ax.set_xlabel("X₀", fontsize=9)
-    fig.colorbar(im, ax=axes, shrink=.4, label="FLI após 400 períodos (escuro: toros KAM; claro: caos)")
+    fig.colorbar(im, ax=axes, shrink=.4, label="FLI após 400 períodos (âmbar: regularidade; escuro: caos)")
     fig.suptitle("Toros KAM (2.5 GL conservativo, f=0,05) vs sintonia β do absorvedor", fontsize=13)
     p = f"{WORK}/KAM_beta_tuning_preview.png"; fig.savefig(p, dpi=140); print("salvo", p)
 

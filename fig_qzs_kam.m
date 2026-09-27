@@ -168,7 +168,7 @@ for r=1:3
     put_rot(L,5,y0+(3-r)*(sz+gy)+sz/2,sprintf('%s, %s',labels{r},etatex{r}),10);
 end
 cb=mm_axes(fig,W,H,x0,8,52,2);manual_colorbar(cb,cmap,[0 5 10 15 20]/20,'%g',[0 5 10 15 20]);
-put_left(L,x0+54,9,'FLI after 400 periods (dark: KAM tori, bright: chaos)',8);
+put_left(L,x0+54,9,'FLI after 400 periods (amber: regularity, dark: chaos)',8);
 put_left(L,x0,3.5,'white dashed: separatrix;  white dotted: \itH\rm_0 - \itU\rm_{min} = 0.5 (region used for the regular fraction)',8);
 put_text(L,W/2,163,'Fast Lyapunov indicator over initial conditions at \itt\rm = 0 (conservative limit)',12);
 export_figure(fig,fullfile(out,'K3_mapas_FLI'),dpi);close(fig);
@@ -277,7 +277,7 @@ for r=1:3
     put_rot(L,5,y0+(3-r)*(sz+gy)+sz/2,sprintf('%s, %s',labels{r},etatex{r}),10);
 end
 cb=mm_axes(fig,W,H,x0,8,52,2);manual_colorbar(cb,cmap,[0 5 10 15 20]/20,'%g',[0 5 10 15 20]);
-put_left(L,x0+54,9,'FLI after 400 periods (dark: KAM tori, bright: chaos)',8);
+put_left(L,x0+54,9,'FLI after 400 periods (amber: regularity, dark: chaos)',8);
 put_left(L,x0,3.5,['full 2.5-DOF system, \it\mu\rm = 0.1, \it\beta\rm = 0.35, absorber at \itZ\rm = \itW\rm = 0 at \itt\rm = 0;' ...
     '  white dotted: \itH\rm_0 - \itU\rm_{min} = 0.5'],8);
 put_text(L,W/2,163,'Fast Lyapunov indicator over initial conditions, QZS-ADV (2.5 DOF), conservative limit',12);
@@ -377,7 +377,7 @@ function cmap=energy_colormap(n)
 cmap=interp_colors({'2b1a6f','3b5bdb','1c9fd6','20b2aa','6cc24a','e0c300','f08c00','d7263d'},n);
 end
 function cmap=fli_colormap(n)
-cmap=interp_colors({'17120f','3f1a13','7a2a1b','a5391f','cf6a2e','e2a049','efd9a6'},n);
+cmap=interp_colors({'efd9a6','e2a049','cf6a2e','a5391f','7a2a1b','3f1a13','17120f'},n);
 end
 function cmap=interp_colors(hex,n)
 rgb=zeros(numel(hex),3);

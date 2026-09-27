@@ -24,7 +24,7 @@ def cmap_from(hexes):
     return LinearSegmentedColormap.from_list("c", ["#" + h for h in hexes])
 
 
-FLI = cmap_from(["17120f", "3f1a13", "7a2a1b", "a5391f", "cf6a2e", "e2a049", "efd9a6"])
+FLI = cmap_from(["efd9a6", "e2a049", "cf6a2e", "a5391f", "7a2a1b", "3f1a13", "17120f"])
 ENE = cmap_from(["2b1a6f", "3b5bdb", "1c9fd6", "20b2aa", "6cc24a", "e0c300", "f08c00", "d7263d"])
 
 
@@ -84,7 +84,7 @@ def fig_K7(D):
                 ax.set_ylabel(LABELS[r] + "\n dX/dt", fontsize=8)
             if r == 2:
                 ax.set_xlabel("X₀", fontsize=9)
-    fig.colorbar(im, ax=axes, shrink=.5, label="FLI após 400 períodos (escuro: regularidade; claro: caos)")
+    fig.colorbar(im, ax=axes, shrink=.5, label="FLI após 400 períodos (âmbar: regularidade; escuro: caos)")
     fig.suptitle("K7 — FLI do sistema completo QZS-ADV (2.5 GL), limite conservativo", fontsize=12)
     p = f"{OUT}/K7_FLI_2p5GL_preview.png"; fig.savefig(p, dpi=130); plt.close(fig); return p
 
@@ -244,7 +244,7 @@ def _fli_grid(D, mapk, xsk, vsk, fk, title, fname):
                 ax.set_ylabel(LABELS[r] + "\n dX₀/dt", fontsize=8)
             if r == 2:
                 ax.set_xlabel("X₀", fontsize=9)
-    fig.colorbar(im, ax=axes, shrink=.5, label="FLI após 400 períodos (escuro: regularidade; claro: caos)")
+    fig.colorbar(im, ax=axes, shrink=.5, label="FLI após 400 períodos (âmbar: regularidade; escuro: caos)")
     fig.suptitle(title, fontsize=12)
     p = f"{OUT}/{fname}"; fig.savefig(p, dpi=130); plt.close(fig); return p
 
