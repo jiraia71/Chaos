@@ -143,7 +143,7 @@ def gerar(beta, base, dpi):
                 ax.set_yticklabels([])
             ax.tick_params(labelsize=13)
         lab = 'Without absorber' if modelo == 1 else (r'With absorber ($\beta$=%.2f)' % beta)
-        axs[r, 0].annotate(lab, xy=(-0.30, 0.5), xycoords='axes fraction', rotation=90,
+        axs[r, 0].annotate(lab, xy=(-0.40, 0.5), xycoords='axes fraction', rotation=90,
                            ha='center', va='center', fontsize=16)
     fig.suptitle(r'FLI maps — shallow wells;  $\Omega$=%.2f,  $\beta$=%.2f' % (OMEGA, beta),
                  fontsize=19, y=0.985)
@@ -151,7 +151,7 @@ def gerar(beta, base, dpi):
     cb = fig.colorbar(im, cax=cbax, orientation='horizontal')
     cb.set_label(r'FLI(%dT), $\log_{10}$ (scale capped at 20)' % PMAPAS, fontsize=15)
     cb.ax.tick_params(labelsize=13)
-    fig.subplots_adjust(left=0.085, right=0.985, top=0.93, bottom=0.135, wspace=0.06, hspace=0.08)
+    fig.subplots_adjust(left=0.11, right=0.985, top=0.93, bottom=0.135, wspace=0.06, hspace=0.08)
     fig.savefig(base + '.png', dpi=dpi, facecolor='white')
     fig.savefig(base + '.pdf', facecolor='white')
     print('figuras salvas:', base + '.png', '/', base + '.pdf')

@@ -190,8 +190,8 @@ def plotar(dados, beta, modelo, base, dpi):
                 ax.set_ylabel('V = dX/dt', fontsize=17)
             else:
                 ax.set_yticklabels([])
-        axs[r, 0].annotate('%s\n$\\eta$=%.4g' % (c0['rotulo'], eta),
-                           xy=(-0.34, 0.5), xycoords='axes fraction', rotation=90,
+        axs[r, 0].annotate('%s ($\\eta$=%.4g)' % (c0['rotulo'], eta),
+                           xy=(-0.47, 0.5), xycoords='axes fraction', rotation=90,
                            ha='center', va='center', fontsize=16)
 
     if modelo == 2:
@@ -203,7 +203,7 @@ def plotar(dados, beta, modelo, base, dpi):
     cb = fig.colorbar(sc, cax=cbax, orientation='horizontal')
     cb.set_label(r'initial energy of the primary  $E_0 - U_{\min}$  (regular orbits)', fontsize=15)
     cb.ax.tick_params(labelsize=13)
-    fig.subplots_adjust(left=0.075, right=0.985, top=0.94, bottom=0.135, wspace=0.08, hspace=0.10)
+    fig.subplots_adjust(left=0.115, right=0.985, top=0.94, bottom=0.135, wspace=0.08, hspace=0.10)
     fig.savefig(base + '.png', dpi=dpi, facecolor='white')
     fig.savefig(base + '.pdf', facecolor='white')
     print('figuras salvas:', base + '.png', '/', base + '.pdf')
