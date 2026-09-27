@@ -44,13 +44,11 @@ def main():
     print('classificacao identica: %s (%d/%d orbitas)'
           % (np.array_equal(r1, r2), np.sum(r1 == r2), r1.size))
 
-    c1 = ~r1
     plt.rcParams.update({'font.family': 'serif', 'mathtext.fontset': 'dejavuserif'})
     fig, ax = plt.subplots(figsize=(9.5, 9), dpi=a.dpi)
-    ax.scatter(p1[:, 0, c1].ravel(), p1[:, 1, c1].ravel(), s=0.5, c='0.8', lw=0, alpha=0.3)
-    ax.scatter(p1[:, 0, r1].ravel(), p1[:, 1, r1].ravel(), s=0.7, c='#1f5fd0', lw=0, alpha=0.55,
+    ax.scatter(p1[:, 0, r1].ravel(), p1[:, 1, r1].ravel(), s=0.7, c='k', lw=0, alpha=0.55,
                label='dt (%d passos/T)' % S.NS_SECOES)
-    ax.scatter(p2[:, 0, r2].ravel(), p2[:, 1, r2].ravel(), s=0.7, c='#e03b1f', lw=0, alpha=0.55,
+    ax.scatter(p2[:, 0, r2].ravel(), p2[:, 1, r2].ravel(), s=0.7, c='#1f6fe0', lw=0, alpha=0.55,
                label='dt/2 (%d passos/T)' % (2*S.NS_SECOES))
     c = S.CASES[nm]
     ax.set_xlim(-c['xw'], c['xw']); ax.set_ylim(-c['vw'], c['vw']); ax.set_aspect('equal')
@@ -58,7 +56,7 @@ def main():
     lab = 'sem absorvedor' if modelo == 1 else (r'com absorvedor, $\beta$=%.2f' % a.beta)
     ax.set_title('Teste de convergência — %s, f=%g (%s)' % (c['rotulo'], a.f, lab), fontsize=12)
     ax.legend(loc='upper center', fontsize=9, markerscale=10, ncol=2)
-    txt = ('Azul (dt) e vermelho (dt/2) sobre as mesmas curvas = roxo.\n'
+    txt = ('Preto (dt) e azul (dt/2) sobre as mesmas curvas.\n'
            '%d/%d órbitas mantêm a classe regular/caótica.\n'
            'Fração caótica: %.0f%% (dt) = %.0f%% (dt/2).\n'
            'Toros e ilhas coincidem sob refino do passo => físicos, não numéricos.'
